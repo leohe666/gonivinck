@@ -1,0 +1,302 @@
+{
+  "executed_at": "2026-08-04T00:12:37+0800",
+  "test_data": {
+    "mobile": "10085773556",
+    "uid": 3,
+    "product_id": 1,
+    "order_id": 1,
+    "pay_id": 1
+  },
+  "results": [
+    {
+      "name": "用户注册",
+      "port": 8000,
+      "path": "/api/user/register",
+      "body": {
+        "name": "apipost-test",
+        "gender": 1,
+        "mobile": "10085773556",
+        "password": "Passw0rd!2026"
+      },
+      "token": false,
+      "status": 200,
+      "response": {
+        "id": 3,
+        "name": "apipost-test",
+        "gender": 1,
+        "mobile": "10085773556"
+      }
+    },
+    {
+      "name": "用户登录",
+      "port": 8000,
+      "path": "/api/user/login",
+      "body": {
+        "mobile": "10085773556",
+        "password": "Passw0rd!2026"
+      },
+      "token": false,
+      "status": 200,
+      "response": {
+        "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3ODU4NTk5NTcsImlhdCI6MTc4NTc3MzU1NywidWlkIjozfQ.jIFh-4i9OvuNoqqc647LbKzftiqubwul8XuUmPMYt_s",
+        "accessExpire": 1785859957
+      }
+    },
+    {
+      "name": "用户信息",
+      "port": 8000,
+      "path": "/api/user/userinfo",
+      "body": {},
+      "token": true,
+      "status": 200,
+      "response": {
+        "id": 3,
+        "name": "apipost-test",
+        "gender": 1,
+        "mobile": "10085773556"
+      }
+    },
+    {
+      "name": "产品创建",
+      "port": 8001,
+      "path": "/api/product/create",
+      "body": {
+        "name": "Apipost 测试商品",
+        "desc": "自动化接口验证数据",
+        "stock": 100,
+        "amount": 1999,
+        "status": 1
+      },
+      "token": true,
+      "status": 200,
+      "response": {
+        "id": 1
+      }
+    },
+    {
+      "name": "产品详情（创建后）",
+      "port": 8001,
+      "path": "/api/product/detail",
+      "body": {
+        "id": 1
+      },
+      "token": true,
+      "status": 200,
+      "response": {
+        "id": 1,
+        "name": "Apipost 测试商品",
+        "desc": "自动化接口验证数据",
+        "stock": 100,
+        "amount": 1999,
+        "status": 1
+      }
+    },
+    {
+      "name": "产品修改",
+      "port": 8001,
+      "path": "/api/product/update",
+      "body": {
+        "id": 1,
+        "name": "Apipost 测试商品（已更新）",
+        "desc": "更新后的验证数据",
+        "stock": 88,
+        "amount": 2099,
+        "status": 1
+      },
+      "token": true,
+      "status": 200,
+      "response": {}
+    },
+    {
+      "name": "产品详情（修改后）",
+      "port": 8001,
+      "path": "/api/product/detail",
+      "body": {
+        "id": 1
+      },
+      "token": true,
+      "status": 200,
+      "response": {
+        "id": 1,
+        "name": "Apipost 测试商品（已更新）",
+        "desc": "更新后的验证数据",
+        "stock": 88,
+        "amount": 2099,
+        "status": 1
+      }
+    },
+    {
+      "name": "订单创建",
+      "port": 8002,
+      "path": "/api/order/create",
+      "body": {
+        "uid": 3,
+        "pid": 1,
+        "amount": 2099,
+        "status": 1
+      },
+      "token": true,
+      "status": 200,
+      "response": {
+        "id": 1
+      }
+    },
+    {
+      "name": "订单详情（创建后）",
+      "port": 8002,
+      "path": "/api/order/detail",
+      "body": {
+        "id": 1
+      },
+      "token": true,
+      "status": 200,
+      "response": {
+        "id": 1,
+        "uid": 3,
+        "pid": 1,
+        "amount": 2099,
+        "status": 0
+      }
+    },
+    {
+      "name": "订单修改",
+      "port": 8002,
+      "path": "/api/order/update",
+      "body": {
+        "id": 1,
+        "uid": 3,
+        "pid": 1,
+        "amount": 2199,
+        "status": 2
+      },
+      "token": true,
+      "status": 200,
+      "response": {}
+    },
+    {
+      "name": "订单详情（修改后）",
+      "port": 8002,
+      "path": "/api/order/detail",
+      "body": {
+        "id": 1
+      },
+      "token": true,
+      "status": 200,
+      "response": {
+        "id": 1,
+        "uid": 3,
+        "pid": 1,
+        "amount": 2199,
+        "status": 2
+      }
+    },
+    {
+      "name": "订单列表",
+      "port": 8002,
+      "path": "/api/order/list",
+      "body": {
+        "uid": 3
+      },
+      "token": true,
+      "status": 200,
+      "response": [
+        {
+          "id": 1,
+          "uid": 3,
+          "pid": 1,
+          "amount": 2199,
+          "status": 2
+        }
+      ]
+    },
+    {
+      "name": "支付创建",
+      "port": 8003,
+      "path": "/api/pay/create",
+      "body": {
+        "uid": 3,
+        "oid": 1,
+        "amount": 2199
+      },
+      "token": true,
+      "status": 200,
+      "response": {
+        "id": 1
+      }
+    },
+    {
+      "name": "支付详情（创建后）",
+      "port": 8003,
+      "path": "/api/pay/detail",
+      "body": {
+        "id": 1
+      },
+      "token": true,
+      "status": 200,
+      "response": {
+        "id": 1,
+        "uid": 3,
+        "oid": 1,
+        "amount": 2199,
+        "source": 0,
+        "status": 0
+      }
+    },
+    {
+      "name": "支付回调",
+      "port": 8003,
+      "path": "/api/pay/callback",
+      "body": {
+        "id": 1,
+        "uid": 3,
+        "oid": 1,
+        "amount": 2199,
+        "source": 1,
+        "status": 1
+      },
+      "token": true,
+      "status": 200,
+      "response": {}
+    },
+    {
+      "name": "支付详情（回调后）",
+      "port": 8003,
+      "path": "/api/pay/detail",
+      "body": {
+        "id": 1
+      },
+      "token": true,
+      "status": 200,
+      "response": {
+        "id": 1,
+        "uid": 3,
+        "oid": 1,
+        "amount": 2199,
+        "source": 1,
+        "status": 1
+      }
+    },
+    {
+      "name": "订单删除",
+      "port": 8002,
+      "path": "/api/order/remove",
+      "body": {
+        "id": 1
+      },
+      "token": true,
+      "status": 200,
+      "response": {}
+    },
+    {
+      "name": "产品删除",
+      "port": 8001,
+      "path": "/api/product/remove",
+      "body": {
+        "id": 1
+      },
+      "token": true,
+      "status": 200,
+      "response": {}
+    }
+  ]
+}
