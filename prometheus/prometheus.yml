@@ -29,7 +29,7 @@ scrape_configs:
       - targets: ["localhost:9090"]
 
   # 我们自己的商城项目配置
-  - job_name: 'mall'
+  - job_name: 'mall-api'
     static_configs:
       # 目标的采集地址
       - targets: ['golang:9080']
@@ -38,19 +38,9 @@ scrape_configs:
           app: 'user-api'
           env: 'test'
 
-      - targets: ['golang:9090']
-        labels:
-          app: 'user-rpc'
-          env: 'test'
-
       - targets: ['golang:9081']
         labels:
           app: 'product-api'
-          env: 'test'
-
-      - targets: ['golang:9091']
-        labels:
-          app: 'product-rpc'
           env: 'test'
 
       - targets: ['golang:9082']
@@ -58,14 +48,28 @@ scrape_configs:
           app: 'order-api'
           env: 'test'
 
-      - targets: ['golang:9092']
-        labels:
-          app: 'order-rpc'
-          env: 'test'
-
       - targets: ['golang:9083']
         labels:
           app: 'pay-api'
+          env: 'test'
+
+  - job_name: 'mall-rpc'
+    static_configs:
+      # 目标的采集地址
+      - targets: ['golang:9090']
+        labels:
+          # 自定义标签
+          app: 'user-rpc'
+          env: 'test'
+
+      - targets: ['golang:9091']
+        labels:
+          app: 'product-rpc'
+          env: 'test'
+
+      - targets: ['golang:9092']
+        labels:
+          app: 'order-rpc'
           env: 'test'
 
       - targets: ['golang:9093']
