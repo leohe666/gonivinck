@@ -11,7 +11,7 @@ datasources:
       derivedFields:
         - name: TraceID
           matcherRegex: '"trace":"([0-9a-f]{32})"'
-          url: '/trace/$${__value.raw}'
+          url: '$${__value.raw}'
           datasourceUid: jaeger
 
   - name: Jaeger
