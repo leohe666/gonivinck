@@ -16,6 +16,18 @@ scrape_configs:
         labels:
           job: golang-services
           __path__: /var/log/golang/*.log
+    pipeline_stages:
+      - json:
+          expressions:
+            trace: trace
+            span: span
+            level: level
+            caller: caller
+            content: content
+      - labels:
+          trace:
+          span:
+          level:
 
   - job_name: loki
     static_configs:
