@@ -36,6 +36,10 @@ RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 USER root
 RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
+# 安装 air (热加载) - v1.61.0 支持 Go 1.25
+USER root
+RUN go install github.com/air-verse/air@v1.61.0
+
 # 清理垃圾
 USER root
 RUN apt-get clean && \

@@ -8,36 +8,46 @@ networks:
 # 服务容器配置
 services:
   golang:                                # 开发环境容器
-    build:
-      context: ./golang
-    environment:
-      - TZ=${TZ}
-    privileged: true
-    volumes:
-      - ${CODE_PATH_HOST}:/usr/src/code
-      - ${DATA_PATH_HOST}/golang:/var/log/golang
-    ports:
-      - "8000:8000"
-      - "8001:8001"
-      - "8002:8002"
-      - "8003:8003"
-      - "9000:9000"
-      - "9001:9001"
-      - "9002:9002"
-      - "9003:9003"
-      - "9080:9080"
-      - "9081:9081"
-      - "9082:9082"
-      - "9083:9083"
-      - "9090:9090"
-      - "9091:9091"
-      - "9092:9092"
-      - "9093:9093"
-    stdin_open: true
-    tty: true
-    networks:
-      - backend
-    restart: always
+      build:
+        context: ./golang
+      environment:
+        - TZ=${TZ}
+      privileged: true
+      volumes:
+        - ${CODE_PATH_HOST}:/usr/src/code
+        - ${DATA_PATH_HOST}/golang:/var/log/golang
+      ports:
+        - "8000:8000"
+        - "8001:8001"
+        - "8002:8002"
+        - "8003:8003"
+        - "9000:9000"
+        - "9001:9001"
+        - "9002:9002"
+        - "9003:9003"
+        - "9080:9080"
+        - "9081:9081"
+        - "9082:9082"
+        - "9083:9083"
+        - "9090:9090"
+        - "9091:9091"
+        - "9092:9092"
+        - "9093:9093"
+      stdin_open: true
+      tty: true
+      networks:
+        - backend
+      restart: always
+      command: >
+        sh -c "
+          cd /usr/src/code &&
+          chmod +x start-services.sh &&
+          # 启动 air 热加载编译器（后台，监听文件变化并重新编译）
+          air -c .air.toml &
+          AIR_PID=\$! &&
+          # 启动 8 个服务（RPC + API）
+          ./start-services.sh
+        "
 
   etcd:                                  # etcd 服务
     image: bitnamilegacy/etcd:3.5
