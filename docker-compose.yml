@@ -42,11 +42,8 @@ services:
         sh -c "
           cd /usr/src/code &&
           chmod +x start-services.sh &&
-          # 启动 air 热加载编译器（后台，监听文件变化并重新编译）
-          air -c .air.toml &
-          AIR_PID=\$! &&
-          # 启动 8 个服务（RPC + API）
-          ./start-services.sh
+          # 启动 8 个 air (每服务独立监听) + 进程守护
+          make run
         "
 
   etcd:                                  # etcd 服务
