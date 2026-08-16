@@ -36,6 +36,11 @@ groups:
             sum(rate(http_server_requests_code_total{code=~"[0-9]+"}[5m])) by (app)
             + on(app) (sum(rate(http_server_requests_code_total{code=~"[0-9]+"}[5m])) by (app) * 0 + 1e-12)
           )
+      # P50 延迟 (ms)
+      - record: job:slo:latency_p50:ms_5m
+        expr: >
+          histogram_quantile(0.50,
+            sum(rate(http_server_requests_duration_ms_bucket[5m])) by (le, app))
       # P95 延迟 (ms)
       - record: job:slo:latency_p95:ms_5m
         expr: >
