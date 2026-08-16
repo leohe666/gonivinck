@@ -166,7 +166,7 @@ services:
       - TZ=${TZ}
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_NAME=Main Org.
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Editor
       - GF_AUTH_BASIC_ENABLED=true
       - GF_AUTH_DISABLE_LOGIN_FORM=false
     ports:
