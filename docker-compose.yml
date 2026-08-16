@@ -147,6 +147,7 @@ services:
     privileged: true
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/slo-rules.yml:/etc/prometheus/slo-rules.yml
       - ${DATA_PATH_HOST}/prometheus:/prometheus
     ports:
       - "${PROMETHEUS_PORT}:9090"

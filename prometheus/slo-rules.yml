@@ -1,0 +1,124 @@
+groups:
+  # ============ SLO 预聚合指标 (Recording Rules) ============
+  - name: slo_recording_rules
+    interval: 30s
+    rules:
+      # 请求总数 / 5xx 错误数 (5m 窗口速率)
+      - record: job:slo:request_rate:sum_5m
+        expr: sum(rate(http_server_requests_code_total{code=~"[0-9]+"}[5m])) by (app)
+      - record: job:slo:error_rate_5xx:sum_5m
+        expr: sum(rate(http_server_requests_code_total{code=~"5[0-9]{2}"}[5m])) by (app)
+      # 可用性 = 1 - 5xx占比 (处理无请求、无5xx情况，保留 app 标签)
+      - record: job:slo:availability:ratio_5m
+        expr: >
+          (
+            sum(rate(http_server_requests_code_total{code=~"[0-9]+"}[5m])) by (app)
+            -
+            (
+              sum(rate(http_server_requests_code_total{code=~"5[0-9]{2}"}[5m])) by (app)
+              or sum(rate(http_server_requests_code_total{code=~"[0-9]+"}[5m])) by (app) * 0
+            )
+          )
+          /
+          (
+            sum(rate(http_server_requests_code_total{code=~"[0-9]+"}[5m])) by (app)
+            + on(app) (sum(rate(http_server_requests_code_total{code=~"[0-9]+"}[5m])) by (app) * 0 + 1e-12)
+          )
+      # 错误率
+      - record: job:slo:error_rate:ratio_5m
+        expr: >
+          (
+            sum(rate(http_server_requests_code_total{code=~"5[0-9]{2}"}[5m])) by (app)
+            or sum(rate(http_server_requests_code_total{code=~"[0-9]+"}[5m])) by (app) * 0
+          )
+          /
+          (
+            sum(rate(http_server_requests_code_total{code=~"[0-9]+"}[5m])) by (app)
+            + on(app) (sum(rate(http_server_requests_code_total{code=~"[0-9]+"}[5m])) by (app) * 0 + 1e-12)
+          )
+      # P95 延迟 (ms)
+      - record: job:slo:latency_p95:ms_5m
+        expr: >
+          histogram_quantile(0.95,
+            sum(rate(http_server_requests_duration_ms_bucket[5m])) by (le, app))
+      # P99 延迟 (ms)
+      - record: job:slo:latency_p99:ms_5m
+        expr: >
+          histogram_quantile(0.99,
+            sum(rate(http_server_requests_duration_ms_bucket[5m])) by (le, app))
+      # RPC 调用错误率 (跨服务)
+      - record: job:slo:rpc_error_rate:ratio_5m
+        expr: >
+          (
+            sum(rate(rpc_client_requests_code_total{code=~"5[0-9]{2}"}[5m])) by (app)
+            or sum(rate(rpc_client_requests_code_total{code=~"[0-9]+"}[5m])) by (app) * 0
+          )
+          /
+          (
+            sum(rate(rpc_client_requests_code_total{code=~"[0-9]+"}[5m])) by (app)
+            + on(app) (sum(rate(rpc_client_requests_code_total{code=~"[0-9]+"}[5m])) by (app) * 0 + 1e-12)
+          )
+
+  # ============ SLA 告警 (Alerting Rules) ============
+  - name: slo_alerting_rules
+    interval: 30s
+    rules:
+      # 服务宕机 (1 分钟无指标)
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "服务 {{ $labels.job }} / {{ $labels.app }} 已宕机"
+          description: "Prometheus 已连续 1 分钟无法抓取 {{ $labels.app }} 指标 (target up=0)"
+
+      # 可用性低于 99.9% SLO (连续 5 分钟)
+      - alert: SLOAvailabilityLow
+        expr: job:slo:availability:ratio_5m < 0.999
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.app }} 可用性低于 99.9% SLO"
+          description: "{{ $labels.app }} 当前可用性 {{ $value | humanizePercentage }},低于目标 99.9%"
+
+      # 错误率超过 0.1% (burn rate 告警)
+      - alert: ErrorRateHigh
+        expr: job:slo:error_rate:ratio_5m > 0.001
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.app }} 错误率过高"
+          description: "{{ $labels.app }} 5xx 错误率 {{ $value | humanizePercentage }},超过 SLO 0.1%"
+
+      # P95 延迟超过 200ms
+      - alert: LatencyP95High
+        expr: job:slo:latency_p95:ms_5m > 200
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.app }} P95 延迟超阈值"
+          description: "{{ $labels.app }} P95={{ $value }}ms,超过阈值 200ms"
+
+      # P99 延迟超过 500ms (红线)
+      - alert: LatencyP99Critical
+        expr: job:slo:latency_p99:ms_5m > 500
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.app }} P99 延迟超红线"
+          description: "{{ $labels.app }} P99={{ $value }}ms,超过红线 500ms"
+
+      # RPC 层错误率高 (下游依赖问题)
+      - alert: RPCErrorRateHigh
+        expr: job:slo:rpc_error_rate:ratio_5m > 0.01
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.app }} RPC 调用错误率高"
+          description: "{{ $labels.app }} 下游 RPC 错误率 {{ $value | humanizePercentage }},超过 1%"
