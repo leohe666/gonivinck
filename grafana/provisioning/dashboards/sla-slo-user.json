@@ -20,527 +20,1004 @@
   "links": [],
   "panels": [
     {
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
-          "color": {"mode": "thresholds"},
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"color": "green", "value": null}
+              {
+                "color": "green",
+                "value": null
+              }
             ]
           },
           "unit": "short"
         },
         "overrides": []
       },
-      "gridPos": {"h": 4, "w": 4, "x": 0, "y": 0},
-      "id": 1,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
-        "textMode": "auto"
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 0
       },
+      "id": 1,
       "targets": [
         {
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "sum(increase(http_server_requests_code_total{app=\"user-api\",method!=\"\"}[$__range]))",
-          "instant": true,
-          "legendFormat": "PV",
-          "refId": "A"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "round(sum(increase(http_server_requests_code_total{app=\"user-api\",method!=\"\"}[$__range])))",
+          "refId": "A",
+          "instant": true
         }
       ],
       "title": "总 PV (区间)",
-      "type": "stat"
+      "type": "stat",
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "textMode": "auto"
+      }
     },
     {
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
-          "color": {"mode": "thresholds"},
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"color": "green", "value": null},
-              {"color": "red", "value": 1}
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
             ]
           },
           "unit": "short"
         },
         "overrides": []
       },
-      "gridPos": {"h": 4, "w": 4, "x": 4, "y": 0},
-      "id": 2,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
-        "textMode": "auto"
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 0
       },
+      "id": 2,
       "targets": [
         {
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "sum(increase(http_server_requests_code_total{app=\"user-api\",method!=\"\",code=~\"4[0-9]{2}|5[0-9]{2}\"}[$__range]))",
-          "instant": true,
-          "legendFormat": "PVlost",
-          "refId": "A"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "round(sum(increase(http_server_requests_code_total{app=\"user-api\",method!=\"\",code=~\"4[0-9]{2}|5[0-9]{2}\"}[$__range])) or vector(0))",
+          "refId": "A",
+          "instant": true
         }
       ],
       "title": "PVlost (4xx+5xx)",
-      "type": "stat"
+      "type": "stat",
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "textMode": "auto"
+      }
     },
     {
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
-          "color": {"mode": "thresholds"},
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"color": "green", "value": null}
+              {
+                "color": "green",
+                "value": null
+              }
             ]
           },
           "unit": "short"
         },
         "overrides": []
       },
-      "gridPos": {"h": 4, "w": 4, "x": 8, "y": 0},
-      "id": 3,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
-        "textMode": "auto"
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 0
       },
+      "id": 3,
       "targets": [
         {
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "sum(increase(http_server_requests_code_total{app=\"user-api\",method!=\"\",code=\"200\"}[$__range]))",
-          "instant": true,
-          "legendFormat": "200",
-          "refId": "A"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "round(sum(increase(http_server_requests_code_total{app=\"user-api\",method!=\"\",code=\"200\"}[$__range])))",
+          "refId": "A",
+          "instant": true
         }
       ],
       "title": "200 次数",
-      "type": "stat"
+      "type": "stat",
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "textMode": "auto"
+      }
     },
     {
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
-          "color": {"mode": "thresholds"},
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"color": "green", "value": null},
-              {"color": "yellow", "value": 1}
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              }
             ]
           },
           "unit": "short"
         },
         "overrides": []
       },
-      "gridPos": {"h": 4, "w": 4, "x": 12, "y": 0},
-      "id": 4,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
-        "textMode": "auto"
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 0
       },
+      "id": 4,
       "targets": [
         {
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "sum(increase(http_server_requests_code_total{app=\"user-api\",method!=\"\",code=~\"4[0-9]{2}\"}[$__range]))",
-          "instant": true,
-          "legendFormat": "4xx",
-          "refId": "A"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "round(sum(increase(http_server_requests_code_total{app=\"user-api\",method!=\"\",code=~\"4[0-9]{2}\"}[$__range])) or vector(0))",
+          "refId": "A",
+          "instant": true
         }
       ],
       "title": "4xx 次数",
-      "type": "stat"
+      "type": "stat",
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "textMode": "auto"
+      }
     },
     {
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
-          "color": {"mode": "thresholds"},
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"color": "green", "value": null},
-              {"color": "red", "value": 1}
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
             ]
           },
           "unit": "short"
         },
         "overrides": []
       },
-      "gridPos": {"h": 4, "w": 4, "x": 16, "y": 0},
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 0
+      },
       "id": 5,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "round(sum(increase(http_server_requests_code_total{app=\"user-api\",method!=\"\",code=~\"5[0-9]{2}\"}[$__range])) or vector(0))",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "title": "5xx 次数",
+      "type": "stat",
       "options": {
         "colorMode": "value",
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
-        "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
         "textMode": "auto"
-      },
-      "targets": [
-        {
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "sum(increase(http_server_requests_code_total{app=\"user-api\",method!=\"\",code=~\"5[0-9]{2}\"}[$__range]))",
-          "instant": true,
-          "legendFormat": "5xx",
-          "refId": "A"
-        }
-      ],
-      "title": "5xx 次数",
-      "type": "stat"
+      }
     },
     {
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
-          "color": {"mode": "thresholds"},
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"color": "red", "value": null},
-              {"color": "yellow", "value": 0.995},
-              {"color": "green", "value": 0.999}
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.995
+              },
+              {
+                "color": "green",
+                "value": 0.999
+              }
             ]
           },
           "unit": "percentunit"
         },
         "overrides": []
       },
-      "gridPos": {"h": 4, "w": 4, "x": 20, "y": 0},
-      "id": 6,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
-        "showThresholdLabels": true,
-        "showThresholdMarkers": true
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 0
       },
+      "id": 6,
       "targets": [
         {
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "(sum(rate(http_server_requests_code_total{app=\"user-api\",method!=\"\"}[5m])) - sum(rate(http_server_requests_code_total{app=\"user-api\",method!=\"\",code=~\"5[0-9]{2}\"}[5m]))) / sum(rate(http_server_requests_code_total{app=\"user-api\",method!=\"\"}[5m]))",
-          "instant": true,
-          "legendFormat": "可用性",
-          "refId": "A"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "(1 - ((sum(rate(http_server_requests_code_total{app=\"user-api\",method!=\"\",code=~\"5[0-9]{2}\"}[5m])) or vector(0)) / (sum(rate(http_server_requests_code_total{app=\"user-api\",method!=\"\"}[5m])) or vector(0)))) and (sum(rate(http_server_requests_code_total{app=\"user-api\",method!=\"\"}[5m])) > 0)",
+          "refId": "A",
+          "instant": true
         }
       ],
       "title": "可用性 (5m)",
-      "type": "gauge"
+      "type": "gauge",
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true
+      }
     },
     {
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
-          "color": {"mode": "thresholds"},
-          "custom": {"align": "auto", "cellOptions": {"type": "auto"}, "inspect": false},
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"color": "green", "value": null}
+              {
+                "color": "green",
+                "value": null
+              }
             ]
           },
           "unit": "short"
         },
         "overrides": [
           {
-            "matcher": {"id": "byName", "options": "5xx"},
+            "matcher": {
+              "id": "byName",
+              "options": "5xx"
+            },
             "properties": [
-              {"id": "color", "value": {"mode": "thresholds"}},
-              {"id": "thresholds", "value": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}}
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 1
+                    }
+                  ]
+                }
+              }
             ]
           },
           {
-            "matcher": {"id": "byName", "options": "PVlost"},
+            "matcher": {
+              "id": "byName",
+              "options": "PVlost"
+            },
             "properties": [
-              {"id": "color", "value": {"mode": "thresholds"}},
-              {"id": "thresholds", "value": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 1}]}}
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 1
+                    }
+                  ]
+                }
+              }
             ]
           },
           {
-            "matcher": {"id": "byName", "options": "P50"},
-            "properties": [{"id": "unit", "value": "ms"}]
-          },
-          {
-            "matcher": {"id": "byName", "options": "P95"},
-            "properties": [{"id": "unit", "value": "ms"}]
-          },
-          {
-            "matcher": {"id": "byName", "options": "P99"},
+            "matcher": {
+              "id": "byName",
+              "options": "P50"
+            },
             "properties": [
-              {"id": "unit", "value": "ms"},
-              {"id": "color", "value": {"mode": "thresholds"}},
-              {"id": "thresholds", "value": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 100}, {"color": "red", "value": 500}]}}
+              {
+                "id": "unit",
+                "value": "ms"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "P95"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "P99"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 100
+                    },
+                    {
+                      "color": "red",
+                      "value": 500
+                    }
+                  ]
+                }
+              }
             ]
           }
         ]
       },
-      "gridPos": {"h": 10, "w": 24, "x": 0, "y": 4},
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
       "id": 7,
       "options": {
         "cellHeight": "sm",
-        "footer": {"countRows": false, "enablePagination": false, "fields": "", "reducer": ["sum"], "show": false},
+        "footer": {
+          "countRows": false,
+          "enablePagination": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
         "showHeader": true,
-        "sortBy": [{"desc": true, "displayName": "PV"}]
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "PV"
+          }
+        ]
       },
       "targets": [
         {
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "sum by (method, path) (increase(http_server_requests_code_total{app=\"user-api\",method!=\"\"}[$__range]))",
-          "format": "table",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "label_replace(round(sum by (method, path) (increase(http_server_requests_code_total{app=\"user-api\",method!=\"\"}[$__range]))), \"__name__\", \"PV\", \"path\", \".*\")",
+          "refId": "A",
           "instant": true,
-          "legendFormat": "PV",
-          "refId": "A"
+          "format": "table"
         },
         {
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "sum by (method, path) (increase(http_server_requests_code_total{app=\"user-api\",method!=\"\",code=~\"4[0-9]{2}|5[0-9]{2}\"}[$__range]))",
-          "format": "table",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "label_replace(round((sum by (method, path) (increase(http_server_requests_code_total{app=\"user-api\",method!=\"\",code=~\"4[0-9]{2}|5[0-9]{2}\"}[$__range]))) or (sum by (method, path) (increase(http_server_requests_code_total{app=\"user-api\",method!=\"\"}[$__range])) * 0)), \"__name__\", \"PVlost\", \"path\", \".*\")",
+          "refId": "B",
           "instant": true,
-          "legendFormat": "PVlost",
-          "refId": "B"
+          "format": "table"
         },
         {
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "sum by (method, path) (increase(http_server_requests_code_total{app=\"user-api\",method!=\"\",code=\"200\"}[$__range]))",
-          "format": "table",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "label_replace(round(sum by (method, path) (increase(http_server_requests_code_total{app=\"user-api\",method!=\"\",code=\"200\"}[$__range]))), \"__name__\", \"200\", \"path\", \".*\")",
+          "refId": "C",
           "instant": true,
-          "legendFormat": "200",
-          "refId": "C"
+          "format": "table"
         },
         {
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "sum by (method, path) (increase(http_server_requests_code_total{app=\"user-api\",method!=\"\",code=~\"5[0-9]{2}\"}[$__range]))",
-          "format": "table",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "label_replace(round((sum by (method, path) (increase(http_server_requests_code_total{app=\"user-api\",method!=\"\",code=~\"5[0-9]{2}\"}[$__range]))) or (sum by (method, path) (increase(http_server_requests_code_total{app=\"user-api\",method!=\"\"}[$__range])) * 0)), \"__name__\", \"5xx\", \"path\", \".*\")",
+          "refId": "D",
           "instant": true,
-          "legendFormat": "5xx",
-          "refId": "D"
+          "format": "table"
         },
         {
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "sum by (method, path) (histogram_quantile(0.50, sum by (le, method, path) (rate(http_server_requests_duration_ms_bucket{app=\"user-api\",method!=\"\"}[$__range]))))",
-          "format": "table",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "label_replace(sum by (method, path) (histogram_quantile(0.50, sum by (le, method, path) (rate(http_server_requests_duration_ms_bucket{app=\"user-api\",method!=\"\"}[$__range])))), \"__name__\", \"P50\", \"path\", \".*\")",
+          "refId": "E",
           "instant": true,
-          "legendFormat": "P50",
-          "refId": "E"
+          "format": "table"
         },
         {
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "sum by (method, path) (histogram_quantile(0.95, sum by (le, method, path) (rate(http_server_requests_duration_ms_bucket{app=\"user-api\",method!=\"\"}[$__range]))))",
-          "format": "table",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "label_replace(sum by (method, path) (histogram_quantile(0.95, sum by (le, method, path) (rate(http_server_requests_duration_ms_bucket{app=\"user-api\",method!=\"\"}[$__range])))), \"__name__\", \"P95\", \"path\", \".*\")",
+          "refId": "F",
           "instant": true,
-          "legendFormat": "P95",
-          "refId": "F"
+          "format": "table"
         },
         {
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "sum by (method, path) (histogram_quantile(0.99, sum by (le, method, path) (rate(http_server_requests_duration_ms_bucket{app=\"user-api\",method!=\"\"}[$__range]))))",
-          "format": "table",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "label_replace(sum by (method, path) (histogram_quantile(0.99, sum by (le, method, path) (rate(http_server_requests_duration_ms_bucket{app=\"user-api\",method!=\"\"}[$__range])))), \"__name__\", \"P99\", \"path\", \".*\")",
+          "refId": "G",
           "instant": true,
-          "legendFormat": "P99",
-          "refId": "G"
+          "format": "table"
         }
       ],
       "title": "接口级 SLA 明细 (PV / PVlost / 200 / 5xx / P50 / P95 / P99)",
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "rows"
+          }
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "method": 0,
+              "path": 1,
+              "PV": 2,
+              "PVlost": 3,
+              "200": 4,
+              "5xx": 5,
+              "P50": 6,
+              "P95": 7,
+              "P99": 8
+            },
+            "renameByName": {}
+          }
+        }
+      ],
       "type": "table"
     },
     {
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
-          "color": {"mode": "palette-classic"},
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
             "drawStyle": "bars",
             "fillOpacity": 60,
             "lineWidth": 1,
             "showPoints": "never",
             "spanNulls": false,
-            "stacking": {"group": "A", "mode": "normal"},
-            "thresholdsStyle": {"mode": "off"}
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
           },
           "mappings": [],
-          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
           "unit": "ops"
         },
         "overrides": []
       },
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14},
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 14
+      },
       "id": 8,
       "options": {
-        "legend": {"calcs": ["max", "lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true},
-        "tooltip": {"mode": "multi", "sort": "desc"}
+        "legend": {
+          "calcs": [
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       },
       "targets": [
         {
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "sum by (method, path) (rate(http_server_requests_code_total{app=\"user-api\",method!=\"\"}[5m]))",
-          "legendFormat": "{{method}} {{path}}",
-          "refId": "A"
+          "refId": "A",
+          "legendFormat": "{{method}} {{path}}"
         }
       ],
       "title": "各接口 PV 趋势 (QPS, 5m)",
       "type": "timeseries"
     },
     {
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
-          "color": {"mode": "palette-classic"},
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
             "drawStyle": "line",
             "fillOpacity": 10,
             "lineWidth": 2,
             "showPoints": "never",
             "spanNulls": false,
-            "stacking": {"group": "A", "mode": "none"},
-            "thresholdsStyle": {"mode": "off"}
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
           },
           "mappings": [],
-          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
           "unit": "ops"
         },
         "overrides": []
       },
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14},
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 14
+      },
       "id": 9,
       "options": {
-        "legend": {"calcs": ["max", "lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true},
-        "tooltip": {"mode": "multi", "sort": "desc"}
+        "legend": {
+          "calcs": [
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       },
       "targets": [
         {
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "sum by (code) (rate(http_server_requests_code_total{app=\"user-api\",method!=\"\",code=~\"4[0-9]{2}|5[0-9]{2}\"}[5m]))",
-          "legendFormat": "{{code}}",
-          "refId": "A"
+          "refId": "A",
+          "legendFormat": "{{code}}"
         }
       ],
       "title": "4xx / 5xx 趋势 (QPS, 5m)",
       "type": "timeseries"
     },
     {
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
-          "color": {"mode": "palette-classic"},
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
             "drawStyle": "line",
             "fillOpacity": 10,
             "lineWidth": 2,
             "showPoints": "never",
             "spanNulls": false,
-            "stacking": {"group": "A", "mode": "none"},
-            "thresholdsStyle": {"mode": "off"}
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
           },
           "mappings": [],
-          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
           "unit": "ms"
         },
         "overrides": []
       },
-      "gridPos": {"h": 8, "w": 16, "x": 0, "y": 22},
+      "gridPos": {
+        "h": 8,
+        "w": 16,
+        "x": 0,
+        "y": 22
+      },
       "id": 10,
       "options": {
-        "legend": {"calcs": ["mean", "max", "lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true},
-        "tooltip": {"mode": "multi", "sort": "desc"}
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       },
       "targets": [
         {
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "histogram_quantile(0.50, sum by (le) (rate(http_server_requests_duration_ms_bucket{app=\"user-api\",method!=\"\"}[5m])))",
-          "legendFormat": "P50",
-          "refId": "A"
+          "refId": "A",
+          "legendFormat": "P50"
         },
         {
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_requests_duration_ms_bucket{app=\"user-api\",method!=\"\"}[5m])))",
-          "legendFormat": "P95",
-          "refId": "B"
+          "refId": "B",
+          "legendFormat": "P95"
         },
         {
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "histogram_quantile(0.99, sum by (le) (rate(http_server_requests_duration_ms_bucket{app=\"user-api\",method!=\"\"}[5m])))",
-          "legendFormat": "P99",
-          "refId": "C"
+          "refId": "C",
+          "legendFormat": "P99"
         }
       ],
       "title": "整体延迟 P50 / P95 / P99 (ms)",
       "type": "timeseries"
     },
     {
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
-          "color": {"mode": "thresholds"},
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"color": "green", "value": null},
-              {"color": "yellow", "value": 0.001},
-              {"color": "red", "value": 0.01}
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.001
+              },
+              {
+                "color": "red",
+                "value": 0.01
+              }
             ]
           },
           "unit": "percentunit"
         },
         "overrides": []
       },
-      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 22},
-      "id": 11,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
-        "showThresholdLabels": true,
-        "showThresholdMarkers": true
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 22
       },
+      "id": 11,
       "targets": [
         {
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "sum(rate(http_server_requests_code_total{app=\"user-api\",method!=\"\",code=~\"5[0-9]{2}\"}[5m])) / sum(rate(http_server_requests_code_total{app=\"user-api\",method!=\"\"}[5m]))",
-          "instant": true,
-          "legendFormat": "错误率",
-          "refId": "A"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "((sum(rate(http_server_requests_code_total{app=\"user-api\",method!=\"\",code=~\"5[0-9]{2}\"}[5m])) or vector(0)) / (sum(rate(http_server_requests_code_total{app=\"user-api\",method!=\"\"}[5m])) or vector(0))) and (sum(rate(http_server_requests_code_total{app=\"user-api\",method!=\"\"}[5m])) > 0)",
+          "refId": "A",
+          "instant": true
         }
       ],
       "title": "5xx 错误率 (5m)",
-      "type": "gauge"
+      "type": "gauge",
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true
+      }
     }
   ],
   "refresh": "30s",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["sla", "slo", "go-zero", "mall", "user"],
+  "tags": [
+    "sla",
+    "slo",
+    "go-zero",
+    "mall",
+    "user"
+  ],
   "templating": {
     "list": []
   },
-  "time": {"from": "now-1h", "to": "now"},
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
   "timepicker": {},
   "timezone": "",
   "title": "SLA 监控 - user 服务 (接口明细)",
   "uid": "sla-slo-user",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }
