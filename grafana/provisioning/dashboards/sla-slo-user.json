@@ -799,7 +799,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "label_replace(round(sum by (method, path) (increase(http_server_requests_code_total{app=\"user-api\",method!=\"\"}[$__range]))), \"__name__\", \"PV\", \"path\", \".*\")",
+          "expr": "round(sum by (method, path) (increase(http_server_requests_code_total{app=\"user-api\",method!=\"\"}[$__range])))",
           "refId": "A",
           "instant": true,
           "format": "table"
@@ -809,7 +809,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "label_replace(round((sum by (method, path) (increase(http_server_requests_code_total{app=\"user-api\",method!=\"\",code=~\"4[0-9]{2}|5[0-9]{2}\"}[$__range]))) or (sum by (method, path) (increase(http_server_requests_code_total{app=\"user-api\",method!=\"\"}[$__range])) * 0)), \"__name__\", \"PVlost\", \"path\", \".*\")",
+          "expr": "round((sum by (method, path) (increase(http_server_requests_code_total{app=\"user-api\",method!=\"\",code=~\"4[0-9]{2}|5[0-9]{2}\"}[$__range]))) or (sum by (method, path) (increase(http_server_requests_code_total{app=\"user-api\",method!=\"\"}[$__range])) * 0))",
           "refId": "B",
           "instant": true,
           "format": "table"
@@ -819,7 +819,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "label_replace(round((sum by (method, path) (increase(http_server_requests_code_total{app=\"user-api\",method!=\"\",code=~\"5[0-9]{2}\"}[$__range]))) or (sum by (method, path) (increase(http_server_requests_code_total{app=\"user-api\",method!=\"\"}[$__range])) * 0)), \"__name__\", \"5xx\", \"path\", \".*\")",
+          "expr": "round((sum by (method, path) (increase(http_server_requests_code_total{app=\"user-api\",method!=\"\",code=~\"5[0-9]{2}\"}[$__range]))) or (sum by (method, path) (increase(http_server_requests_code_total{app=\"user-api\",method!=\"\"}[$__range])) * 0))",
           "refId": "C",
           "instant": true,
           "format": "table"
@@ -829,7 +829,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "label_replace(round((sum by (method, path) (increase(http_server_requests_code_total{app=\"user-api\",method!=\"\",code=~\"4[0-9]{2}\"}[$__range]))) or (sum by (method, path) (increase(http_server_requests_code_total{app=\"user-api\",method!=\"\"}[$__range])) * 0)), \"__name__\", \"4xx\", \"path\", \".*\")",
+          "expr": "round((sum by (method, path) (increase(http_server_requests_code_total{app=\"user-api\",method!=\"\",code=~\"4[0-9]{2}\"}[$__range]))) or (sum by (method, path) (increase(http_server_requests_code_total{app=\"user-api\",method!=\"\"}[$__range])) * 0))",
           "refId": "D",
           "instant": true,
           "format": "table"
@@ -839,7 +839,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "label_replace(sum by (method, path) (histogram_quantile(0.50, sum by (le, method, path) (rate(http_server_requests_duration_ms_bucket{app=\"user-api\",method!=\"\"}[$__range])))), \"__name__\", \"P50\", \"path\", \".*\")",
+          "expr": "sum by (method, path) (histogram_quantile(0.50, sum by (le, method, path) (rate(http_server_requests_duration_ms_bucket{app=\"user-api\",method!=\"\"}[$__range]))))",
           "refId": "E",
           "instant": true,
           "format": "table"
@@ -849,7 +849,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "label_replace(sum by (method, path) (histogram_quantile(0.95, sum by (le, method, path) (rate(http_server_requests_duration_ms_bucket{app=\"user-api\",method!=\"\"}[$__range])))), \"__name__\", \"P95\", \"path\", \".*\")",
+          "expr": "sum by (method, path) (histogram_quantile(0.95, sum by (le, method, path) (rate(http_server_requests_duration_ms_bucket{app=\"user-api\",method!=\"\"}[$__range]))))",
           "refId": "F",
           "instant": true,
           "format": "table"
@@ -859,7 +859,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "label_replace(sum by (method, path) (histogram_quantile(0.99, sum by (le, method, path) (rate(http_server_requests_duration_ms_bucket{app=\"user-api\",method!=\"\"}[$__range])))), \"__name__\", \"P99\", \"path\", \".*\")",
+          "expr": "sum by (method, path) (histogram_quantile(0.99, sum by (le, method, path) (rate(http_server_requests_duration_ms_bucket{app=\"user-api\",method!=\"\"}[$__range]))))",
           "refId": "G",
           "instant": true,
           "format": "table"
@@ -870,8 +870,7 @@
         {
           "id": "labelsToFields",
           "options": {
-            "mode": "columns",
-            "valueLabel": "__name__"
+            "mode": "columns"
           }
         },
         {
@@ -895,7 +894,15 @@
               "P95": 7,
               "P99": 8
             },
-            "renameByName": {}
+            "renameByName": {
+              "Value #A": "PV",
+              "Value #B": "PVlost",
+              "Value #C": "5xx",
+              "Value #D": "4xx",
+              "Value #E": "P50",
+              "Value #F": "P95",
+              "Value #G": "P99"
+            }
           }
         }
       ],
