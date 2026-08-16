@@ -36,7 +36,7 @@
         },
         "overrides": []
       },
-      "gridPos": {"h": 4, "w": 24, "x": 0, "y": 0},
+      "gridPos": {"h": 4, "w": 12, "x": 0, "y": 0},
       "id": 1,
       "options": {
         "orientation": "auto",
@@ -47,13 +47,14 @@
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "job:slo:availability:ratio_5m",
+          "expr": "sum(rate(http_server_requests_code_total{app=~\"$service\"}[5m])) by (app) - sum(rate(http_server_requests_code_total{app=~\"$service\",code=~\"5[0-9]{2}\"}[5m])) by (app) / sum(rate(http_server_requests_code_total{app=~\"$service\"}[5m])) by (app)",
           "legendFormat": "{{app}}",
           "refId": "A"
         }
       ],
-      "title": "可用性 (5m) - 目标 > 99.9%",
-      "type": "gauge"
+      "title": "可用性 (5m) - $service",
+      "type": "gauge",
+      "repeat": "service"
     },
     {
       "datasource": {"type": "prometheus", "uid": "prometheus"},
@@ -66,7 +67,7 @@
         },
         "overrides": []
       },
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
       "id": 2,
       "options": {
         "legend": {"calcs": ["mean", "max", "lastNotNull"], "displayMode": "table", "placement": "bottom"},
@@ -75,25 +76,26 @@
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "sum(rate(http_server_requests_code_total[5m])) by (app)",
-          "legendFormat": "{{app}} - 总 QPS",
+          "expr": "sum(rate(http_server_requests_code_total{app=~\"$service\"}[5m])) by (app, method, path)",
+          "legendFormat": "{{method}} {{path}} - 总 QPS",
           "refId": "A"
         },
         {
           "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "sum(rate(http_server_requests_code_total{code=~\"5[0-9]{2}\"}[5m])) by (app)",
-          "legendFormat": "{{app}} - 5xx QPS",
+          "expr": "sum(rate(http_server_requests_code_total{app=~\"$service\",code=~\"5[0-9]{2}\"}[5m])) by (app, method, path)",
+          "legendFormat": "{{method}} {{path}} - 5xx QPS",
           "refId": "B"
         },
         {
           "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "sum(rate(http_server_requests_code_total{code=~\"4[0-9]{2}\"}[5m])) by (app)",
-          "legendFormat": "{{app}} - 4xx QPS",
+          "expr": "sum(rate(http_server_requests_code_total{app=~\"$service\",code=~\"4[0-9]{2}\"}[5m])) by (app, method, path)",
+          "legendFormat": "{{method}} {{path}} - 4xx QPS",
           "refId": "C"
         }
       ],
-      "title": "各服务 QPS 明细 (总 / 5xx / 4xx)",
-      "type": "timeseries"
+      "title": "各接口 QPS 明细 (总 / 5xx / 4xx) - $service",
+      "type": "timeseries",
+      "repeat": "service"
     },
     {
       "datasource": {"type": "prometheus", "uid": "prometheus"},
@@ -113,7 +115,7 @@
         },
         "overrides": []
       },
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+      "gridPos": {"h": 4, "w": 12, "x": 0, "y": 8},
       "id": 3,
       "options": {
         "orientation": "auto",
@@ -124,13 +126,14 @@
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "job:slo:error_rate:ratio_5m",
+          "expr": "sum(rate(http_server_requests_code_total{app=~\"$service\",code=~\"5[0-9]{2}\"}[5m])) by (app) / sum(rate(http_server_requests_code_total{app=~\"$service\"}[5m])) by (app)",
           "legendFormat": "{{app}}",
           "refId": "A"
         }
       ],
-      "title": "错误率 (5m) - 目标 < 0.1%",
-      "type": "gauge"
+      "title": "错误率 (5m) - $service",
+      "type": "gauge",
+      "repeat": "service"
     },
     {
       "datasource": {"type": "prometheus", "uid": "prometheus"},
@@ -143,7 +146,7 @@
         },
         "overrides": []
       },
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
       "id": 4,
       "options": {
         "legend": {"calcs": ["mean", "max", "lastNotNull"], "displayMode": "table", "placement": "bottom"},
@@ -152,25 +155,26 @@
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "job:slo:latency_p50:ms_5m",
-          "legendFormat": "{{app}} P50",
+          "expr": "histogram_quantile(0.50, sum(rate(http_server_requests_duration_ms_bucket{app=~\"$service\"}[5m])) by (le, app, method, path))",
+          "legendFormat": "{{method}} {{path}} P50",
           "refId": "A"
         },
         {
           "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "job:slo:latency_p95:ms_5m",
-          "legendFormat": "{{app}} P95",
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_duration_ms_bucket{app=~\"$service\"}[5m])) by (le, app, method, path))",
+          "legendFormat": "{{method}} {{path}} P95",
           "refId": "B"
         },
         {
           "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "job:slo:latency_p99:ms_5m",
-          "legendFormat": "{{app}} P99",
+          "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_duration_ms_bucket{app=~\"$service\"}[5m])) by (le, app, method, path))",
+          "legendFormat": "{{method}} {{path}} P99",
           "refId": "C"
         }
       ],
-      "title": "延迟分位数 P50/P95/P99 (ms)",
-      "type": "timeseries"
+      "title": "各接口延迟 P50/P95/P99 (ms) - $service",
+      "type": "timeseries",
+      "repeat": "service"
     },
     {
       "datasource": {"type": "prometheus", "uid": "prometheus"},
@@ -190,7 +194,7 @@
         },
         "overrides": []
       },
-      "gridPos": {"h": 4, "w": 12, "x": 12, "y": 12},
+      "gridPos": {"h": 4, "w": 12, "x": 0, "y": 16},
       "id": 5,
       "options": {
         "showHeader": true,
@@ -199,129 +203,16 @@
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "up{job=~\"mall.*\"}",
+          "expr": "up{job=~\"mall.*\", app=~\"$service\"}",
           "format": "table",
           "instant": true,
           "legendFormat": "{{app}}",
           "refId": "A"
         }
       ],
-      "title": "服务存活状态",
-      "type": "table"
-    },
-    {
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
-      "fieldConfig": {
-        "defaults": {
-          "color": {"mode": "thresholds"},
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {"color": "green", "value": null},
-              {"color": "yellow", "value": 0.01},
-              {"color": "red", "value": 0.05}
-            ]
-          },
-          "unit": "percentunit"
-        },
-        "overrides": []
-      },
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20},
-      "id": 6,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
-        "showThresholdLabels": true,
-        "showThresholdMarkers": true
-      },
-      "targets": [
-        {
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "job:slo:rpc_error_rate:ratio_5m",
-          "legendFormat": "{{app}}",
-          "refId": "A"
-        }
-      ],
-      "title": "RPC 调用错误率 (5m)",
-      "type": "gauge"
-    },
-    {
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
-      "fieldConfig": {
-        "defaults": {
-          "custom": {"lineWidth": 1},
-          "mappings": [],
-          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20},
-      "id": 7,
-      "options": {
-        "legend": {"calcs": ["mean", "max", "lastNotNull"], "displayMode": "table", "placement": "bottom"},
-        "tooltip": {"mode": "single"}
-      },
-      "targets": [
-        {
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "sum(rate(http_server_requests_code_total{code=\"200\"}[5m])) by (app)",
-          "legendFormat": "{{app}} - 200 OK",
-          "refId": "A"
-        },
-        {
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "sum(rate(http_server_requests_code_total{code=~\"5[0-9]{2}\"}[5m])) by (app)",
-          "legendFormat": "{{app}} - 5xx",
-          "refId": "B"
-        },
-        {
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "sum(rate(http_server_requests_code_total{code=~\"4[0-9]{2}\"}[5m])) by (app)",
-          "legendFormat": "{{app}} - 4xx",
-          "refId": "C"
-        }
-      ],
-      "title": "HTTP 状态码分布 (200 / 4xx / 5xx QPS)",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
-      "fieldConfig": {
-        "defaults": {
-          "color": {"mode": "thresholds"},
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {"color": "green", "value": null},
-              {"color": "yellow", "value": 2},
-              {"color": "red", "value": 14}
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {"h": 4, "w": 12, "x": 0, "y": 28},
-      "id": 8,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
-        "showThresholdLabels": true,
-        "showThresholdMarkers": true
-      },
-      "targets": [
-        {
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "(1 - job:slo:availability:ratio_5m) / (1 - 0.999) * 30 * 24 * 60 / 5",
-          "legendFormat": "{{app}}",
-          "refId": "A"
-        }
-      ],
-      "title": "错误预算燃烧率 (5m) - >2 预警, >14 严重",
-      "type": "gauge"
+      "title": "服务存活状态 - $service",
+      "type": "table",
+      "repeat": "service"
     },
     {
       "datasource": {"type": "prometheus", "uid": "prometheus"},
@@ -334,8 +225,8 @@
         },
         "overrides": []
       },
-      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 32},
-      "id": 9,
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+      "id": 6,
       "options": {
         "legend": {"calcs": ["sum", "lastNotNull"], "displayMode": "table", "placement": "bottom"},
         "tooltip": {"mode": "single"}
@@ -343,18 +234,48 @@
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "sum(rate(http_server_requests_code_total[5m])) by (app, code)",
-          "legendFormat": "{{app}} - {{code}}",
+          "expr": "sum(rate(http_server_requests_code_total{app=~\"$service\"}[5m])) by (app, method, path, code)",
+          "legendFormat": "{{method}} {{path}} - {{code}}",
           "refId": "A"
         }
       ],
-      "title": "全服务 HTTP 状态码明细表 (每个 code 单独一行)",
-      "type": "table"
+      "title": "各接口 HTTP 状态码明细 - $service",
+      "type": "table",
+      "repeat": "service"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {
+        "defaults": {
+          "custom": {"lineWidth": 1},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 20},
+      "id": 7,
+      "options": {
+        "legend": {"calcs": ["sum", "lastNotNull"], "displayMode": "table", "placement": "bottom"},
+        "tooltip": {"mode": "single"}
+      },
+      "targets": [
+        {
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "expr": "sum(rate(http_server_requests_code_total{app=~\"$service\"}[5m])) by (app, method, path, code)",
+          "legendFormat": "{{method}} {{path}} - {{code}} QPS",
+          "refId": "A"
+        }
+      ],
+      "title": "接口级统计表 (PV / 200 / 4xx / 5xx) - $service",
+      "type": "table",
+      "repeat": "service"
     }
   ],
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["sla", "slo", "go-zero", "mall"],
+  "tags": ["sla", "slo", "go-zero", "mall", "per-service"],
   "templating": {
     "list": [
       {
@@ -381,8 +302,8 @@
   "time": {"from": "now-1h", "to": "now"},
   "timepicker": {},
   "timezone": "",
-  "title": "SLA / SLO 监控 - go-zero-mall (Per-Service View)",
+  "title": "SLA / SLO 监控 - go-zero-mall (Per-Service Detail)",
   "uid": "sla-slo-mall",
-  "version": 2,
+  "version": 8,
   "weekStart": ""
 }
