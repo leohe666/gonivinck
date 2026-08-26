@@ -12,15 +12,21 @@ services:
         context: ./golang
       environment:
         - TZ=${TZ}
-      privileged: true
+        # 限制 go 编译并行度,避免 9 个服务同时构建时 OOM (Docker VM 内存有限)
+        - GOFLAGS=-p=1
       volumes:
         - ${CODE_PATH_HOST}:/usr/src/code
         - ${DATA_PATH_HOST}/golang:/var/log/golang
+        # 持久化 go 模块缓存与构建缓存,容器重建后无需全量冷编译
+        - ${DATA_PATH_HOST}/golang-mod:/go/pkg/mod
+        - ${DATA_PATH_HOST}/golang-build:/root/.cache/go-build
+      privileged: true
       ports:
         - "8000:8000"
         - "8001:8001"
         - "8002:8002"
         - "8003:8003"
+        - "8888:8888"
         - "9000:9000"
         - "9001:9001"
         - "9002:9002"

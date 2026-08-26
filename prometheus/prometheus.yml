@@ -75,3 +75,11 @@ scrape_configs:
         labels:
           app: 'pay-rpc'
           env: 'test'
+
+  # BFF 统一网关
+  - job_name: 'mall-gateway'
+    static_configs:
+      - targets: ['golang:9088']
+        labels:
+          app: 'gateway-api'
+          env: 'test'
