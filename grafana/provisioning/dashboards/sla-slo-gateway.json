@@ -376,7 +376,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(increase(http_server_requests_code_total{app=\"gateway-api\"}[$__rate_interval],code=~\"4[0-9]{2}\")) or vector(0)",
+          "expr": "sum(increase(http_server_requests_code_total{app=\"gateway-api\",code=~\"4[0-9]{2}\"}[$__rate_interval])) or vector(0)",
           "refId": "A"
         },
         {
@@ -384,7 +384,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(increase(http_server_requests_code_total{app=\"gateway-api\"}[$__rate_interval] offset 1d,code=~\"4[0-9]{2}\")) or vector(0)",
+          "expr": "sum(increase(http_server_requests_code_total{app=\"gateway-api\",code=~\"4[0-9]{2}\"}[$__rate_interval] offset 1d)) or vector(0)",
           "refId": "B"
         },
         {
@@ -392,7 +392,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(increase(http_server_requests_code_total{app=\"gateway-api\"}[$__rate_interval] offset 7d,code=~\"4[0-9]{2}\")) or vector(0)",
+          "expr": "sum(increase(http_server_requests_code_total{app=\"gateway-api\",code=~\"4[0-9]{2}\"}[$__rate_interval] offset 7d)) or vector(0)",
           "refId": "C"
         }
       ],
@@ -885,6 +885,6 @@
   "timezone": "",
   "title": "SLA 监控 - BFF 网关 (统一入口)",
   "uid": "sla-slo-gateway",
-  "version": 2,
+  "version": 3,
   "weekStart": ""
 }
