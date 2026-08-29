@@ -83,3 +83,11 @@ scrape_configs:
         labels:
           app: 'gateway-api'
           env: 'test'
+
+  # BFF 聚合服务 (8887, 方案B 拆分后新增)
+  - job_name: 'mall-bff'
+    static_configs:
+      - targets: ['golang:9087']
+        labels:
+          app: 'bff-api'
+          env: 'test'

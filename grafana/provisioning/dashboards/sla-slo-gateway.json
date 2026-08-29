@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "统一 BFF 网关 SLA 看板 (对齐 SLA 监控 - user 服务 配置) - 网关是唯一入口,这里是整个系统的 SLA",
+  "description": "透传网关 SLA 看板 (方案B: 纯 HTTP→gRPC 转发, 端口 8888; 聚合接口已拆到 BFF)",
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
@@ -883,8 +883,8 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "SLA 监控 - BFF 网关 (统一入口)",
+  "title": "SLA 监控 - 透传网关 (纯转发 8888)",
   "uid": "sla-slo-gateway",
-  "version": 3,
+  "version": 4,
   "weekStart": ""
 }
