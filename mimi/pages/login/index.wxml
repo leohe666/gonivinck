@@ -1,0 +1,55 @@
+<view class="page">
+  <view class="brand">
+    <view class="logo">🛒</view>
+    <text class="title">商城小程序</text>
+    <text class="subtitle">Casdoor SaaS 统一身份登录</text>
+  </view>
+
+  <!-- 完善资料（可选）：新版头像/昵称组件，登录时一并提交给后端 -->
+  <view class="profile" wx:if="{{!result}}">
+    <view class="profile-row">
+      <text class="label">头像</text>
+      <button class="avatar-btn" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
+        <image wx:if="{{avatar}}" class="avatar-img" src="{{avatar}}" mode="aspectFill" />
+        <text wx:else class="avatar-placeholder">选择头像</text>
+      </button>
+    </view>
+    <view class="profile-row">
+      <text class="label">昵称</text>
+      <input
+        class="nickname-input"
+        type="nickname"
+        placeholder="微信昵称（可选）"
+        value="{{nickname}}"
+        bindinput="onNicknameInput"
+      />
+    </view>
+  </view>
+
+  <button
+    class="login-btn {{loading ? 'disabled' : ''}}"
+    loading="{{loading}}"
+    disabled="{{loading}}"
+    bindtap="onLogin"
+  >
+    {{loading ? '正在登录...' : '微信一键登录'}}
+  </button>
+
+  <view class="tip">
+    登录即表示同意使用 Casdoor 统一身份认证<br />首次登录将自动注册商城账号
+  </view>
+
+  <!-- 登录结果 -->
+  <view class="result" wx:if="{{result}}">
+    <text class="result-title">✅ 登录成功</text>
+    <view class="result-item"><text class="k">userId</text><text class="v">{{result.userId}}</text></view>
+    <view class="result-item"><text class="k">casdoorName</text><text class="v">{{result.casdoorName}}</text></view>
+    <view class="result-item"><text class="k">accessToken</text><text class="v token">{{tokenPreview}}</text></view>
+    <text class="result-hint">1.5 秒后自动进入首页</text>
+  </view>
+
+  <view class="result error" wx:if="{{error}}">
+    <text class="result-title">❌ 登录失败</text>
+    <view class="result-item"><text class="v">{{error}}</text></view>
+  </view>
+</view>

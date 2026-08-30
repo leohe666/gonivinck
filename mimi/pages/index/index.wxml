@@ -1,0 +1,33 @@
+<view class="page">
+  <view class="card">
+    <text class="card-title">登录态</text>
+    <view class="row">
+      <text class="k">userId</text>
+      <text class="v">{{userId || '未登录'}}</text>
+    </view>
+    <view class="row">
+      <text class="k">casdoorName</text>
+      <text class="v">{{casdoorName || '未登录'}}</text>
+    </view>
+    <view class="row">
+      <text class="k">token</text>
+      <text class="v token">{{tokenPreview || '未登录'}}</text>
+    </view>
+  </view>
+
+  <view class="card">
+    <text class="card-title">用户信息（需 token 调 /api/user/userinfo）</text>
+    <block wx:if="{{userInfo}}">
+      <view class="row"><text class="k">id</text><text class="v">{{userInfo.id}}</text></view>
+      <view class="row"><text class="k">name</text><text class="v">{{userInfo.name}}</text></view>
+      <view class="row"><text class="k">mobile</text><text class="v">{{userInfo.mobile}}</text></view>
+      <view class="row"><text class="k">gender</text><text class="v">{{userInfo.gender}}</text></view>
+    </block>
+    <text class="empty" wx:else>点击下方按钮获取</text>
+  </view>
+
+  <button class="btn-primary action" loading="{{loading}}" bindtap="onGetUserInfo">
+    获取用户信息
+  </button>
+  <button class="btn-outline action" bindtap="onLogout">退出登录</button>
+</view>

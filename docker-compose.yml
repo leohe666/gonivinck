@@ -22,23 +22,9 @@ services:
         - ${DATA_PATH_HOST}/golang-build:/root/.cache/go-build
       privileged: true
       ports:
-        - "8000:8000"
-        - "8001:8001"
-        - "8002:8002"
-        - "8003:8003"
+        # 统一网关是唯一对外入口；旧 API 端口(8000-8003)与 RPC 端口已下线，
+        # 服务间发现/监控走容器内网络(etcd + prometheus 内网采集)
         - "8888:8888"
-        - "9000:9000"
-        - "9001:9001"
-        - "9002:9002"
-        - "9003:9003"
-        - "9080:9080"
-        - "9081:9081"
-        - "9082:9082"
-        - "9083:9083"
-        - "9090:9090"
-        - "9091:9091"
-        - "9092:9092"
-        - "9093:9093"
       stdin_open: true
       tty: true
       networks:
@@ -51,6 +37,32 @@ services:
           # 启动 9 个 air (每服务独立监听) + 进程守护
           make run
         "
+
+  casdoor:                               # Casdoor 统一身份认证 (SaaS 模式 IdP)
+    image: casbin/casdoor:3.163.0
+    environment:
+      - TZ=${TZ}
+      # 使用内置 SQLite（纯 Go 驱动，无需 MySQL），数据持久化到 data/casdoor
+      - driverName=sqlite
+      - dataSourceName=file:/data/casdoor.db?cache=shared
+      # 首次启动时导入 init_data.json（组织/应用/微信小程序 Provider/证书/演示用户）
+      - initDataFile=/casdoor/init_data.json
+      - initDataNewOnly=true
+      - origin=http://localhost:8443
+      - defaultLanguage=zh
+    ports:
+      - "8443:8000"
+    volumes:
+      - ./casdoor/init_data.json:/casdoor/init_data.json:ro
+      - ${DATA_PATH_HOST}/casdoor:/data
+    networks:
+      - backend
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   etcd:                                  # etcd 服务
     image: bitnamilegacy/etcd:3.5
@@ -233,6 +245,10 @@ services:
     image: grafana/loki:latest
     environment:
       - TZ=${TZ}
+    command:
+      - -config.file=/etc/loki/local-config.yaml
+      # 宿主数据卷使用率 96%>90% 导致 Loki 拒绝写入（查不到日志），调高 WAL 磁盘阈值；设 0 可禁用
+      - -ingester.wal-disk-full-threshold=0.99
     ports:
       - "3100:3100"
     volumes:

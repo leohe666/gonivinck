@@ -32,3 +32,20 @@ limits_config:
   ingestion_rate_mb: 10
   ingestion_burst_size_mb: 20
   allow_structured_metadata: false
+  # 日志保留期：仅保留最近 48h，更早的由 compactor 自动删除
+  retention_period: 48h
+
+# WAL 磁盘保护阈值通过 docker-compose 的 CLI flag 注入：
+#   -ingester.wal-disk-full-threshold=0.99
+# （该 flag 不存在于 YAML 的 ingester 块；宿主数据卷使用率偏高时 Loki 默认 0.9 会拒绝写入，
+#   本项目日志量极小，磁盘压力来自宿主其他应用，调高避免误伤，设 0 可完全禁用检查）
+
+# compactor：启用保留期清理，定期删除超过 retention_period 的旧日志
+compactor:
+  working_directory: /loki/compactor
+  compaction_interval: 10m
+  retention_enabled: true
+  retention_delete_delay: 2h
+  retention_delete_worker_count: 150
+  # 单机 filesystem 部署：删除请求存储也必须指向 filesystem（Loki 3.7 校验要求）
+  delete_request_store: filesystem

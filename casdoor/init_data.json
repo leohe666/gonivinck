@@ -1,0 +1,158 @@
+{
+  "organizations": [
+    {
+      "owner": "admin",
+      "name": "mall",
+      "displayName": "Mall SaaS 商城租户",
+      "websiteUrl": "",
+      "passwordType": "bcrypt",
+      "passwordOptions": [
+        "AtLeast6"
+      ],
+      "countryCodes": [
+        "US",
+        "GB",
+        "ES",
+        "FR",
+        "DE",
+        "CN",
+        "JP",
+        "KR",
+        "VN",
+        "ID",
+        "SG",
+        "IN",
+        "IT",
+        "MY",
+        "TR",
+        "DZ",
+        "IL",
+        "PH",
+        "NL",
+        "PL",
+        "FI",
+        "SE",
+        "UA",
+        "KZ",
+        "CZ",
+        "SK",
+        "AZ"
+      ],
+      "defaultAvatar": "",
+      "defaultApplication": "mall-app",
+      "defaultTokenFormat": "JWT",
+      "tags": [],
+      "languages": [
+        "en",
+        "es",
+        "fr",
+        "de",
+        "ja",
+        "zh",
+        "vi",
+        "pt",
+        "tr",
+        "pl",
+        "uk"
+      ],
+      "masterPassword": "",
+      "defaultPassword": "",
+      "initScore": 0,
+      "enableSoftDeletion": false,
+      "isManualUpdatePassword": false,
+      "createdTime": ""
+    }
+  ],
+  "providers": [
+    {
+      "owner": "admin",
+      "name": "provider-wechat-mp",
+      "displayName": "微信小程序 (WeChat Mini Program)",
+      "category": "OAuth",
+      "type": "WeChatMiniProgram",
+      "method": "jwt",
+      "clientId": "wxf76e1101f4b99b6d",
+      "clientSecret": "REPLACE_WITH_REAL_WECHAT_APP_SECRET",
+      "enableProxy": false,
+      "enablePkce": false,
+      "createdTime": ""
+    }
+  ],
+  "certs": [
+    {
+      "owner": "mall",
+      "name": "cert-mall",
+      "displayName": "Mall JWT 证书",
+      "scope": "JWT",
+      "type": "x509",
+      "cryptoAlgorithm": "rsa",
+      "bitSize": 2048,
+      "expireInYears": 10,
+      "certificate": "-----BEGIN CERTIFICATE-----\nMIICqjCCAZICCQD9hfjKXMi2rTANBgkqhkiG9w0BAQsFADAXMRUwEwYDVQQDDAxj\nYXNkb29yLW1hbGwwHhcNMjYwODMwMTA0MzU5WhcNMzYwODI3MTA0MzU5WjAXMRUw\nEwYDVQQDDAxjYXNkb29yLW1hbGwwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEK\nAoIBAQDFZz1jdB6NwOmnRuF/mVre9PzagBCJ+Yvkpe7/G43N9ffbgruA2vJMg1ej\nGRAG12yQWnfbzyjDMJygwFm297nNO330V4n8kjec9lYSDtdONf0Z7cp4ppt5dXhX\nKGHBqnUQsZYo6VALm+2Ba5pyAPUjYhqVjtGuDaUrlICrD4+mf7UfGbsjYcOmF+JS\nZh2bCqgnK2qTDECMSR7D79/J4KLYkKKmk+1stmZb1VdAQ/k6Y+Qj4CCw4T4g58hz\n/ewK90KpTLkfO90FNSgkhKM6bJiXv2Y4vE6JJLncqUZBus/oGJVuU8uPW0Gtzdju\n7U7xAFeI0/OBmffiWJclWTfv56E/AgMBAAEwDQYJKoZIhvcNAQELBQADggEBAEwD\nl3Jd9LL0UBoR8GCGkktVba44dikmVcWVfyTPLPtcVsSNx2tb3A6DOVthkMq34ap3\ninvWzPISu+zvjfRokkeWUbzDwjwd9RehC58GkEUt2fj9lNm2Rwo/qFgNi17EKk2H\nuADinV197xf2E51vTXbqfshs+UdmwKFKNMWTWh9x6NxbOkJ3KqGCS7Tqnlj7ojXC\nN6jT0bg88HcSRuIgtdkZ8T+k2YgZOZZJEBBZtMzDMlXCkjeOPw9FEXdXNljT5XmV\nR1lZ1qDnjzTE0c4rmEZBO062bADClE+CQG8Si7phAYhTps1xIk2mbQ/sgrypCeqM\ncLLKQhzO73iapd5MK8I=\n-----END CERTIFICATE-----",
+      "privateKey": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDFZz1jdB6NwOmn\nRuF/mVre9PzagBCJ+Yvkpe7/G43N9ffbgruA2vJMg1ejGRAG12yQWnfbzyjDMJyg\nwFm297nNO330V4n8kjec9lYSDtdONf0Z7cp4ppt5dXhXKGHBqnUQsZYo6VALm+2B\na5pyAPUjYhqVjtGuDaUrlICrD4+mf7UfGbsjYcOmF+JSZh2bCqgnK2qTDECMSR7D\n79/J4KLYkKKmk+1stmZb1VdAQ/k6Y+Qj4CCw4T4g58hz/ewK90KpTLkfO90FNSgk\nhKM6bJiXv2Y4vE6JJLncqUZBus/oGJVuU8uPW0Gtzdju7U7xAFeI0/OBmffiWJcl\nWTfv56E/AgMBAAECggEAPMTWahpiGYNMqpkwbAZ6qe5DNMR90uvGfAH0/AWwdroE\nrkeljzpXouRAA06A14pTunCPO1SfmM8LOJVeSOwj/6ET2jdknCMrCZ/vySlWcJZA\nL047qT6o2BAolrQwu9zMovH4ZunEIX7D87Z7WiMfU+AsjOPleq5qrWrO3Vox/6//\n7sleboyjJoveHvmSpFiNRRJYouwfRRbd86TDwdC0W7mtlIRqIqud++E5bXT1m2l7\nb6BvmpW8AwrPCSbg6oErju5OuvG+F87ivZyuCz9Ush24BOEa6mrgcng+TL7/2Zlw\n5YlfcBEz7UIA4sIA0KTgIpSuG9gerDlipXg9YqmpiQKBgQDzBvKnD2H+Vjkd5lkC\nAhKynkziR4Hno07v4zf0kV6LnI25Gfg6MTCgPugiPvc5tWgR8C34GXDe112MDe3i\nnKdkHMR+RA5LQlRGQBGLjJzDjvXYNGrEbl/BGZq3CfoKH3g1o+gXUdGsSD2xhspO\n+TOY3AMacWlKrS4c/23LeENy2wKBgQDP8NNhE2oe7o7oODu7YMrEEKvoOGVUxVHM\nyRucajR7mUZc7XaTnEqyy0h5lJAmsFP8arEJ/ElfFkqgCHHKtFdhYjdUTpqEM9LA\nqpUg8Vz46b6tuBGj8gPcKBcj3oU3NytJaFtfqa1q1QLfg5wYnUsUOyM9yBnn8MjJ\nUQNH4uNObQKBgGcmA8e0V7tDjWqLYivgBV+aoLdJ8nEGd3KJ1i4PpTlMcTqnMxw/\n1IuvJ4ehgf0Uad9zOY+b/LQYZLQVFWqhYsqzCxMsf4Sh2nMWrlu0irTV8LKbTNWi\nozGqVGhr65xwTu01bES5jWy6HLVEqIlsa+HtP8PxbucrKe9U2p0JplcRAoGBAL4b\n8lWFV3dSKWtbxhiI5LieeVyE+vemsyOkFc9KNhNuTas2GzvXH2AZhHhLgAMvIInc\nzWFQu4/opG9taQOnH2BUWDuG5bPKYXtuOYt1v8d+hKr0Z4RZBnhoWsebcHXLxZKG\ni0uJqJfMiaTqAXNrkzG643xfjnfEZv3PSE2XvLN9AoGAXffUHkiLDexZrqATF2wv\nlO7qh/QEiJOOwX0WbP2UIMTw9uzrbLciWGbkm0+AMXSYixqU3PEM6/MjZCOu6DVI\neQWmn7aiCI+iX3BCyXsEmNzNtbv7gxmyDOgEctaI0NK5ab9kl9/zb1ylOmIwdSMc\nTKkfsqdlB0R05lxsQp/vqa4=\n-----END PRIVATE KEY-----"
+    }
+  ],
+  "applications": [
+    {
+      "owner": "admin",
+      "name": "mall-app",
+      "displayName": "Go-Zero Mall",
+      "category": "",
+      "type": "",
+      "organization": "mall",
+      "cert": "cert-mall",
+      "enablePassword": true,
+      "enableSignUp": true,
+      "enableSigninSession": false,
+      "enableAutoSignin": false,
+      "clientId": "mall-client-id",
+      "clientSecret": "mall-client-secret",
+      "redirectUris": [
+        "http://localhost:8888/callback",
+        "http://localhost:8000/callback"
+      ],
+      "grantTypes": [
+        "authorization_code",
+        "password",
+        "refresh_token",
+        "client_credentials",
+        "token",
+        "id_token"
+      ],
+      "tokenFormat": "JWT",
+      "tokenSigningMethod": "RS256",
+      "expireInHours": 168,
+      "refreshExpireInHours": 336,
+      "providers": [
+        {
+          "owner": "admin",
+          "name": "provider-wechat-mp",
+          "canSignUp": true,
+          "canSignIn": true,
+          "canUnlink": false,
+          "prompted": false,
+          "signupGroup": "",
+          "rule": "None"
+        }
+      ],
+      "createdTime": ""
+    }
+  ],
+  "users": [
+    {
+      "owner": "mall",
+      "name": "mall-user",
+      "displayName": "Mall 演示用户",
+      "password": "123456",
+      "type": "normal-user",
+      "email": "mall-user@mall.local",
+      "phone": "10000000000",
+      "countryCode": "86",
+      "isAdmin": false,
+      "isForbidden": false,
+      "isDeleted": false,
+      "signupApplication": "mall-app",
+      "createdTime": ""
+    }
+  ]
+}

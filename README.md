@@ -86,6 +86,10 @@ curl http://localhost:36789
 | **Jaeger** | http://localhost:5000 | 链路追踪 |
 | **DTM HTTP** | localhost:36789 | 分布式事务 HTTP |
 | **DTM gRPC** | localhost:36790 | 分布式事务 gRPC |
+| **Casdoor** | http://localhost:8443 | 统一身份认证（SaaS 模式 IdP），默认账号 admin / 123 |
+
+> 微信小程序登录（Casdoor）接入说明见 [docs/casdoor-integration.md](docs/casdoor-integration.md)，
+> 配套微信小程序项目见 [mimi/](mimi/)（登录流程已走通，真实 AppID/AppSecret 已配置）。
 
 ## 目录结构
 
@@ -95,6 +99,12 @@ gonivinck_new/
 ├── docker-compose.yml            # 服务编排
 ├── golang/                       # 开发环境容器
 │   └── Dockerfile
+├── casdoor/                      # Casdoor 初始化配置
+│   ├── init_data.json            # 租户/应用/微信Provider/证书 首次启动自动导入
+│   └── cert-mall.{crt,key}       # Casdoor JWT 签名证书
+├── docs/
+│   └── casdoor-integration.md    # Casdoor SaaS 模式 + 微信小程序登录接入说明
+├── mimi/                         # 微信小程序项目（Casdoor 登录，DevTools 直接导入）
 ├── prometheus/
 │   └── prometheus.yml            # Prometheus 配置
 ├── dtm/
@@ -103,6 +113,7 @@ gonivinck_new/
 │   ├── mysql/
 │   ├── redis/
 │   ├── etcd/
+│   ├── casdoor/
 │   ├── prometheus/
 │   └── grafana/
 ├── code/                         # 代码挂载目录
@@ -176,15 +187,19 @@ docker-compose exec mysql bash
 
 ### 按 request-id (= trace-id) 查日志 + 全链路（三种方式）
 
+> 网关（8888）所有接口的**响应头**都会返回 `request_id` / `X-Request-Id`，
+> 其值 = W3C `Traceparent` 的 trace-id（与 Loki 日志的 `trace` 字段、Jaeger trace 同源），
+> 直接取响应头 `request_id` 即可按下面的方式查全链路日志。
+
 #### 方式 1：Loki LogQL（命令行）
 ```bash
-# 1) 触发一次业务请求
-T=$(curl -s -X POST http://localhost:8000/api/user/login \
+# 1) 触发一次业务请求（响应头里的 request_id 即 trace-id）
+T=$(curl -s -X POST http://localhost:8888/api/user/login \
   -H 'Content-Type: application/json' \
   -d '{"mobile":"13800000000","password":"***"}' \
-  | python3 -c "import json,sys; print(json.load(sys.stdin)['accessToken'])")
+  | python3 -c "import json,sys; print(json.load(sys.stdin)['data']['accessToken'])")
 
-curl -s -X POST http://localhost:8000/api/user/userinfo \
+curl -s -X POST http://localhost:8888/api/user/userinfo \
   -H "Authorization: Bearer $T"
 
 # 2) 从 Loki 取 trace-id (最近 1 小时)
@@ -225,28 +240,28 @@ curl -s "http://localhost:5001/api/traces/$RID" | python3 -m json.tool
 
 ### 本地开发（热加载）
 
-代码挂载在 `code/` 目录，容器内路径 `/usr/src/code`。8 个业务微服务 + 1 个统一网关，各自独立 air 热加载。
+代码挂载在 `code/` 目录，容器内路径 `/usr/src/code`。4 个 RPC 微服务 + 1 个统一网关（旧 API 服务 8000-8003 已下线，统一走 8888），各自独立 air 热加载。
 
 ```bash
 # 进入 golang 容器
 docker exec -it gonivinck_new-golang-1 bash
 
-# 方式 A：一键启动（推荐，9 个 air + 进程守护）
+# 方式 A：一键启动（推荐，5 个 air + 进程守护）
 cd /usr/src/code && make run
 
 # 方式 B：分离模式
-# 终端 1: make air       # 仅启动 9 个 air 文件监听
-# 终端 2: make services  # 仅启动 9 个服务进程（由 air 编译后自动重启）
+# 终端 1: make air       # 仅启动 5 个 air 文件监听
+# 终端 2: make services  # 仅启动 5 个服务进程（由 air 编译后自动重启）
 
 # 常用 make 命令
-make build   # 仅编译 9 服务到 tmp/
+make build   # 仅编译 5 服务到 tmp/
 make stop    # 停止所有 air + 服务进程
 make clean   # 清理 tmp/ 编译产物
 make help    # 显示帮助
 ```
 
 **Makefile 关键特性**
-- 9 个服务各自独立 `.air.*.toml` → 改哪个重哪个，互不干扰
+- 5 个服务（4 RPC + 网关）各自独立 `.air.*.toml` → 改哪个重哪个，互不干扰
 - 统一网关 `service/gateway`：一个进程一个端口 (8888)，承载 HTTP→gRPC 透传 + login/userinfo/aggregate 聚合接口
 - `start-services.sh` 串行重启：等进程退出 → 等端口释放 → 校验 ELF 合法 → debounce 去重
 - 编译产物输出到 `tmp/`，不污染源码目录
@@ -256,8 +271,8 @@ make help    # 显示帮助
 ### 故障排查清单
 
 ```bash
-# 1. 8 微服务是否存活
-docker exec gonivinck_new-golang-1 sh -c "ps aux | grep -E 'tmp/.*_(api|rpc)' | grep -v grep | wc -l"  # 应为 8
+# 1. 5 个服务进程是否存活（4 RPC + 统一网关，旧 API 已下线）
+docker exec gonivinck_new-golang-1 sh -c "ps aux | grep -E 'tmp/.*_(rpc|api)' | grep -v grep | wc -l"  # 应为 5
 
 # 2. Prometheus 采集状态
 curl -s http://localhost:3000/api/v1/targets | python3 -c "import json,sys; [print(t['labels']['app'], t['health']) for t in json.load(sys.stdin)['data']['activeTargets']]"

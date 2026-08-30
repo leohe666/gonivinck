@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>NAT 测试页</title>
+<style>
+body { font-family: -apple-system, "PingFang SC", sans-serif; background:#0f172a; color:#e2e8f0; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; }
+.card { background:#1e293b; padding:40px 50px; border-radius:12px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,.4); }
+h1 { color:#38bdf8; margin:0 0 10px; }
+p { margin:6px 0; color:#94a3b8; }
+b { color:#f8fafc; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>✔ nginx 转发成功</h1>
+  <p>这是本机 Docker nginx 容器返回的页面。</p>
+  <p>主机名：<b>$(hostname)</b></p>
+  <p>容器服务：<b>nginx:alpine</b></p>
+  <p>如果通过公网/内网 IP 能看到本页，说明 路由器 NAT / 端口映射 已生效。</p>
+</div>
+</body>
+</html>

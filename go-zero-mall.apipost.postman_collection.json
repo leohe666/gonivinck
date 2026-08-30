@@ -1,9 +1,9 @@
 {
   "info": {
-    "_postman_id": "go-zero-mall-verified-collection",
-    "name": "go-zero-mall（已实际验证）",
+    "_postman_id": "go-zero-mall-unified-gateway",
+    "name": "go-zero-mall（统一网关 8888，统一响应体）",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "导入 Apipost：导入 > Postman Collection。请求的实际运行返回已保存在每个接口的 Examples/示例里。运行前先执行“用户登录”，把返回 accessToken 填进 Collection Variables 的 token。"
+    "description": "导入 Apipost：导入 > Postman Collection。\n\n所有接口统一走网关 8888（旧 API 端口 8000-8003 已下线）。\n\n【统一响应体】所有接口返回 {code, msg, data}：\n- code=0 成功，业务数据在 data\n- code!=0 失败，msg 为错误信息，data 为 null（HTTP 状态码 4xx/5xx 保留）\n- 401 未登录：HTTP 401 + 空 body（go-zero JWT 默认行为）\n- 响应头带 request_id（= Traceparent 的 trace-id，可按它查 Loki 全链路日志）\n\n运行顺序建议：\n1. 用户服务 → 用户注册 → 用户登录（把返回的 data.accessToken 填进 Collection Variables 的 token）\n2. 商品服务 → 产品创建（拿到 data.id 后改到后续请求）\n3. 订单服务 → 订单创建 → 订单聚合（需 token）\n4. 支付服务 → 支付创建 → 支付回调\n\n注意：透传接口（注册/商品/订单/支付 CRUD）请求体使用 proto 字段名（Name/Mobile/id 等）；自定义聚合接口（login/userinfo/aggregate）使用小写 json 字段。微信小程序登录 code 需来自真实 wx.login()。"
   },
   "variable": [
     {
@@ -13,7 +13,7 @@
     },
     {
       "key": "token",
-      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3ODU4NTk5NTcsImlhdCI6MTc4NTc3MzU1NywidWlkIjozfQ.jIFh-4i9OvuNoqqc647LbKzftiqubwul8XuUmPMYt_s",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3ODgxOTE5MjYsImlhdCI6MTc4ODEwNTUyNiwidWlkIjoyNn0.cEZtUpXjo2YX0ywfUPmD6dB8hHemreuP_AffqrkGFtI",
       "type": "string"
     }
   ],
@@ -34,7 +34,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"apipost-test\",\n  \"gender\": 1,\n  \"mobile\": \"10085773556\",\n  \"password\": \"Passw0rd!2026\"\n}",
+              "raw": "{\n  \"Name\": \"apipost-统一网关\",\n  \"Gender\": 1,\n  \"Mobile\": \"18805526038\",\n  \"Password\": \"Passw0rd!2026\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -42,11 +42,11 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}:8000/api/user/register",
+              "raw": "{{baseUrl}}:8888/api/user/register",
               "host": [
                 "{{baseUrl}}"
               ],
-              "port": "8000",
+              "port": "8888",
               "path": [
                 "api",
                 "user",
@@ -56,7 +56,7 @@
           },
           "response": [
             {
-              "name": "实际运行结果 HTTP 200",
+              "name": "实际运行结果 HTTP 200（统一响应体）",
               "originalRequest": {
                 "method": "POST",
                 "header": [
@@ -68,7 +68,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\"name\": \"apipost-test\", \"gender\": 1, \"mobile\": \"10085773556\", \"password\": \"Passw0rd!2026\"}",
+                  "raw": "{\n  \"Name\": \"apipost-统一网关\",\n  \"Gender\": 1,\n  \"Mobile\": \"18805526038\",\n  \"Password\": \"Passw0rd!2026\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -76,11 +76,11 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}:8000/api/user/register",
+                  "raw": "{{baseUrl}}:8888/api/user/register",
                   "host": [
                     "{{baseUrl}}"
                   ],
-                  "port": "8000",
+                  "port": "8888",
                   "path": [
                     "api",
                     "user",
@@ -97,10 +97,9 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"id\": 3,\n  \"name\": \"apipost-test\",\n  \"gender\": 1,\n  \"mobile\": \"10085773556\"\n}"
+              "body": "{\n  \"code\": 0,\n  \"msg\": \"ok\",\n  \"data\": {\n    \"Gender\": \"1\",\n    \"Id\": \"26\",\n    \"Mobile\": \"18805526038\",\n    \"Name\": \"apipost-统一网关\"\n  }\n}"
             }
-          ],
-          "description": "已实际执行。HTTP 200\n\nCurl:\ncurl -X POST '{{baseUrl}}:8000/api/user/register' -H 'Content-Type: application/json' -d '{\"name\": \"apipost-test\", \"gender\": 1, \"mobile\": \"10085773556\", \"password\": \"Passw0rd!2026\"}'\n\n实际返回：\n{\n  \"id\": 3,\n  \"name\": \"apipost-test\",\n  \"gender\": 1,\n  \"mobile\": \"10085773556\"\n}"
+          ]
         },
         {
           "name": "用户登录",
@@ -115,7 +114,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"mobile\": \"10085773556\",\n  \"password\": \"Passw0rd!2026\"\n}",
+              "raw": "{\n  \"mobile\": \"18805526038\",\n  \"password\": \"Passw0rd!2026\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -123,11 +122,11 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}:8000/api/user/login",
+              "raw": "{{baseUrl}}:8888/api/user/login",
               "host": [
                 "{{baseUrl}}"
               ],
-              "port": "8000",
+              "port": "8888",
               "path": [
                 "api",
                 "user",
@@ -137,7 +136,7 @@
           },
           "response": [
             {
-              "name": "实际运行结果 HTTP 200",
+              "name": "实际运行结果 HTTP 200（统一响应体）",
               "originalRequest": {
                 "method": "POST",
                 "header": [
@@ -149,7 +148,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\"mobile\": \"10085773556\", \"password\": \"Passw0rd!2026\"}",
+                  "raw": "{\n  \"mobile\": \"18805526038\",\n  \"password\": \"Passw0rd!2026\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -157,11 +156,11 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}:8000/api/user/login",
+                  "raw": "{{baseUrl}}:8888/api/user/login",
                   "host": [
                     "{{baseUrl}}"
                   ],
-                  "port": "8000",
+                  "port": "8888",
                   "path": [
                     "api",
                     "user",
@@ -178,10 +177,137 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3ODU4NTk5NTcsImlhdCI6MTc4NTc3MzU1NywidWlkIjozfQ.jIFh-4i9OvuNoqqc647LbKzftiqubwul8XuUmPMYt_s\",\n  \"accessExpire\": 1785859957\n}"
+              "body": "{\n  \"code\": 0,\n  \"msg\": \"ok\",\n  \"data\": {\n    \"accessExpire\": 1788191926,\n    \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3ODgxOTE5MjYsImlhdCI6MTc4ODEwNTUyNiwidWlkIjoyNn0.cEZtUpXjo2YX0ywfUPmD6dB8hHemreuP_AffqrkGFtI\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "微信小程序登录（Casdoor）",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"FAKE_CODE_FOR_APIPOST\",\n  \"username\": \"微信用户\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}:8888/api/user/mp/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "port": "8888",
+              "path": [
+                "api",
+                "user",
+                "mp",
+                "login"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "实际运行结果 HTTP 400（统一响应体）",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"FAKE_CODE_FOR_APIPOST\",\n  \"username\": \"微信用户\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}:8888/api/user/mp/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "8888",
+                  "path": [
+                    "api",
+                    "user",
+                    "mp",
+                    "login"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"code\": 400,\n  \"msg\": \"casdoor error: invalid_grant: get wechat mini program session error: err: invalid code, rid: 6a945336-0f57f7f8-7f4cbfe7\\n\",\n  \"data\": null\n}"
+            },
+            {
+              "name": "成功响应结构示例（真实 code 时返回）",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"FAKE_CODE_FOR_APIPOST\",\n  \"username\": \"微信用户\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}:8888/api/user/mp/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "8888",
+                  "path": [
+                    "api",
+                    "user",
+                    "mp",
+                    "login"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"code\": 0,\n  \"msg\": \"ok\",\n  \"data\": {\n    \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"accessExpire\": 1788175243,\n    \"userId\": 18,\n    \"casdoorName\": \"wechat-<微信openid>\"\n  }\n}"
             }
           ],
-          "description": "已实际执行。HTTP 200\n\nCurl:\ncurl -X POST '{{baseUrl}}:8000/api/user/login' -H 'Content-Type: application/json' -d '{\"mobile\": \"10085773556\", \"password\": \"Passw0rd!2026\"}'\n\n实际返回：\n{\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3ODU4NTk5NTcsImlhdCI6MTc4NTc3MzU1NywidWlkIjozfQ.jIFh-4i9OvuNoqqc647LbKzftiqubwul8XuUmPMYt_s\",\n  \"accessExpire\": 1785859957\n}"
+          "description": "微信小程序登录（Casdoor SaaS 模式）。\n\n流程：小程序 wx.login() 获取 code → 提交给本接口 → 后端转交 Casdoor（tag=wechat_miniprogram）→ Casdoor 用真实小程序 AppID/AppSecret 调微信 jscode2session 换 openid → 签发 Casdoor JWT → 后端校验后落地本地 user 表（首次自动注册）→ 返回商城 JWT。\n\n注意：code 必须来自真实 wx.login()（一次性、5 分钟有效）；本集合记录的是真实模式下假 code 的请求，微信返回 invalid code 属预期（证明 AppID/AppSecret 已被微信接受），统一响应体 code=400。\n\n联调时把 code 换成 DevTools 或真机 wx.login() 返回的真实值即可，成功时 data.accessToken 为商城 JWT。"
         },
         {
           "name": "用户信息",
@@ -209,11 +335,11 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}:8000/api/user/userinfo",
+              "raw": "{{baseUrl}}:8888/api/user/userinfo",
               "host": [
                 "{{baseUrl}}"
               ],
-              "port": "8000",
+              "port": "8888",
               "path": [
                 "api",
                 "user",
@@ -223,7 +349,7 @@
           },
           "response": [
             {
-              "name": "实际运行结果 HTTP 200",
+              "name": "实际运行结果 HTTP 200（统一响应体）",
               "originalRequest": {
                 "method": "POST",
                 "header": [
@@ -248,11 +374,11 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}:8000/api/user/userinfo",
+                  "raw": "{{baseUrl}}:8888/api/user/userinfo",
                   "host": [
                     "{{baseUrl}}"
                   ],
-                  "port": "8000",
+                  "port": "8888",
                   "path": [
                     "api",
                     "user",
@@ -269,15 +395,14 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"id\": 3,\n  \"name\": \"apipost-test\",\n  \"gender\": 1,\n  \"mobile\": \"10085773556\"\n}"
+              "body": "{\n  \"code\": 0,\n  \"msg\": \"ok\",\n  \"data\": {\n    \"gender\": 1,\n    \"id\": 26,\n    \"mobile\": \"18805526038\",\n    \"name\": \"apipost-统一网关\"\n  }\n}"
             }
-          ],
-          "description": "已实际执行。HTTP 200\n\nCurl:\ncurl -X POST '{{baseUrl}}:8000/api/user/userinfo' -H 'Content-Type: application/json' -H 'Authorization: Bearer {{token}}' -d '{}'\n\n实际返回：\n{\n  \"id\": 3,\n  \"name\": \"apipost-test\",\n  \"gender\": 1,\n  \"mobile\": \"10085773556\"\n}"
+          ]
         }
       ]
     },
     {
-      "name": "产品服务",
+      "name": "商品服务",
       "item": [
         {
           "name": "产品创建",
@@ -288,16 +413,11 @@
                 "key": "Content-Type",
                 "value": "application/json",
                 "type": "text"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Apipost 测试商品\",\n  \"desc\": \"自动化接口验证数据\",\n  \"stock\": 100,\n  \"amount\": 1999,\n  \"status\": 1\n}",
+              "raw": "{\n  \"Name\": \"网关测试商品\",\n  \"Desc\": \"统一网关透传验证\",\n  \"Stock\": 100,\n  \"Amount\": 1999,\n  \"Status\": 1\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -305,11 +425,11 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}:8001/api/product/create",
+              "raw": "{{baseUrl}}:8888/api/product/create",
               "host": [
                 "{{baseUrl}}"
               ],
-              "port": "8001",
+              "port": "8888",
               "path": [
                 "api",
                 "product",
@@ -319,7 +439,7 @@
           },
           "response": [
             {
-              "name": "实际运行结果 HTTP 200",
+              "name": "实际运行结果 HTTP 200（统一响应体）",
               "originalRequest": {
                 "method": "POST",
                 "header": [
@@ -327,16 +447,11 @@
                     "key": "Content-Type",
                     "value": "application/json",
                     "type": "text"
-                  },
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
                   }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\"name\": \"Apipost 测试商品\", \"desc\": \"自动化接口验证数据\", \"stock\": 100, \"amount\": 1999, \"status\": 1}",
+                  "raw": "{\n  \"Name\": \"网关测试商品\",\n  \"Desc\": \"统一网关透传验证\",\n  \"Stock\": 100,\n  \"Amount\": 1999,\n  \"Status\": 1\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -344,11 +459,11 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}:8001/api/product/create",
+                  "raw": "{{baseUrl}}:8888/api/product/create",
                   "host": [
                     "{{baseUrl}}"
                   ],
-                  "port": "8001",
+                  "port": "8888",
                   "path": [
                     "api",
                     "product",
@@ -365,10 +480,9 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"id\": 1\n}"
+              "body": "{\n  \"code\": 0,\n  \"msg\": \"ok\",\n  \"data\": {\n    \"id\": \"15\"\n  }\n}"
             }
-          ],
-          "description": "已实际执行。HTTP 200\n\nCurl:\ncurl -X POST '{{baseUrl}}:8001/api/product/create' -H 'Content-Type: application/json' -H 'Authorization: Bearer {{token}}' -d '{\"name\": \"Apipost 测试商品\", \"desc\": \"自动化接口验证数据\", \"stock\": 100, \"amount\": 1999, \"status\": 1}'\n\n实际返回：\n{\n  \"id\": 1\n}"
+          ]
         },
         {
           "name": "产品详情（创建后）",
@@ -379,16 +493,11 @@
                 "key": "Content-Type",
                 "value": "application/json",
                 "type": "text"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id\": 1\n}",
+              "raw": "{\n  \"id\": 15\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -396,11 +505,11 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}:8001/api/product/detail",
+              "raw": "{{baseUrl}}:8888/api/product/detail",
               "host": [
                 "{{baseUrl}}"
               ],
-              "port": "8001",
+              "port": "8888",
               "path": [
                 "api",
                 "product",
@@ -410,7 +519,7 @@
           },
           "response": [
             {
-              "name": "实际运行结果 HTTP 200",
+              "name": "实际运行结果 HTTP 200（统一响应体）",
               "originalRequest": {
                 "method": "POST",
                 "header": [
@@ -418,16 +527,11 @@
                     "key": "Content-Type",
                     "value": "application/json",
                     "type": "text"
-                  },
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
                   }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\"id\": 1}",
+                  "raw": "{\n  \"id\": 15\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -435,11 +539,11 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}:8001/api/product/detail",
+                  "raw": "{{baseUrl}}:8888/api/product/detail",
                   "host": [
                     "{{baseUrl}}"
                   ],
-                  "port": "8001",
+                  "port": "8888",
                   "path": [
                     "api",
                     "product",
@@ -456,10 +560,9 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"id\": 1,\n  \"name\": \"Apipost 测试商品\",\n  \"desc\": \"自动化接口验证数据\",\n  \"stock\": 100,\n  \"amount\": 1999,\n  \"status\": 1\n}"
+              "body": "{\n  \"code\": 0,\n  \"msg\": \"ok\",\n  \"data\": {\n    \"Amount\": \"1999\",\n    \"Desc\": \"统一网关透传验证\",\n    \"Name\": \"网关测试商品\",\n    \"Status\": \"1\",\n    \"Stock\": \"100\",\n    \"id\": \"15\"\n  }\n}"
             }
-          ],
-          "description": "已实际执行。HTTP 200\n\nCurl:\ncurl -X POST '{{baseUrl}}:8001/api/product/detail' -H 'Content-Type: application/json' -H 'Authorization: Bearer {{token}}' -d '{\"id\": 1}'\n\n实际返回：\n{\n  \"id\": 1,\n  \"name\": \"Apipost 测试商品\",\n  \"desc\": \"自动化接口验证数据\",\n  \"stock\": 100,\n  \"amount\": 1999,\n  \"status\": 1\n}"
+          ]
         },
         {
           "name": "产品修改",
@@ -470,16 +573,11 @@
                 "key": "Content-Type",
                 "value": "application/json",
                 "type": "text"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id\": 1,\n  \"name\": \"Apipost 测试商品（已更新）\",\n  \"desc\": \"更新后的验证数据\",\n  \"stock\": 88,\n  \"amount\": 2099,\n  \"status\": 1\n}",
+              "raw": "{\n  \"id\": 15,\n  \"Name\": \"网关测试商品（已更新）\",\n  \"Desc\": \"更新后的验证数据\",\n  \"Stock\": 88,\n  \"Amount\": 2099,\n  \"Status\": 1\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -487,11 +585,11 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}:8001/api/product/update",
+              "raw": "{{baseUrl}}:8888/api/product/update",
               "host": [
                 "{{baseUrl}}"
               ],
-              "port": "8001",
+              "port": "8888",
               "path": [
                 "api",
                 "product",
@@ -501,7 +599,7 @@
           },
           "response": [
             {
-              "name": "实际运行结果 HTTP 200",
+              "name": "实际运行结果 HTTP 200（统一响应体）",
               "originalRequest": {
                 "method": "POST",
                 "header": [
@@ -509,16 +607,11 @@
                     "key": "Content-Type",
                     "value": "application/json",
                     "type": "text"
-                  },
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
                   }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\"id\": 1, \"name\": \"Apipost 测试商品（已更新）\", \"desc\": \"更新后的验证数据\", \"stock\": 88, \"amount\": 2099, \"status\": 1}",
+                  "raw": "{\n  \"id\": 15,\n  \"Name\": \"网关测试商品（已更新）\",\n  \"Desc\": \"更新后的验证数据\",\n  \"Stock\": 88,\n  \"Amount\": 2099,\n  \"Status\": 1\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -526,11 +619,11 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}:8001/api/product/update",
+                  "raw": "{{baseUrl}}:8888/api/product/update",
                   "host": [
                     "{{baseUrl}}"
                   ],
-                  "port": "8001",
+                  "port": "8888",
                   "path": [
                     "api",
                     "product",
@@ -547,10 +640,9 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{}"
+              "body": "{\n  \"code\": 0,\n  \"msg\": \"ok\",\n  \"data\": {}\n}"
             }
-          ],
-          "description": "已实际执行。HTTP 200\n\nCurl:\ncurl -X POST '{{baseUrl}}:8001/api/product/update' -H 'Content-Type: application/json' -H 'Authorization: Bearer {{token}}' -d '{\"id\": 1, \"name\": \"Apipost 测试商品（已更新）\", \"desc\": \"更新后的验证数据\", \"stock\": 88, \"amount\": 2099, \"status\": 1}'\n\n实际返回：\n{}"
+          ]
         },
         {
           "name": "产品详情（修改后）",
@@ -561,16 +653,11 @@
                 "key": "Content-Type",
                 "value": "application/json",
                 "type": "text"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id\": 1\n}",
+              "raw": "{\n  \"id\": 15\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -578,11 +665,11 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}:8001/api/product/detail",
+              "raw": "{{baseUrl}}:8888/api/product/detail",
               "host": [
                 "{{baseUrl}}"
               ],
-              "port": "8001",
+              "port": "8888",
               "path": [
                 "api",
                 "product",
@@ -592,7 +679,7 @@
           },
           "response": [
             {
-              "name": "实际运行结果 HTTP 200",
+              "name": "实际运行结果 HTTP 200（统一响应体）",
               "originalRequest": {
                 "method": "POST",
                 "header": [
@@ -600,16 +687,11 @@
                     "key": "Content-Type",
                     "value": "application/json",
                     "type": "text"
-                  },
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
                   }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\"id\": 1}",
+                  "raw": "{\n  \"id\": 15\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -617,11 +699,11 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}:8001/api/product/detail",
+                  "raw": "{{baseUrl}}:8888/api/product/detail",
                   "host": [
                     "{{baseUrl}}"
                   ],
-                  "port": "8001",
+                  "port": "8888",
                   "path": [
                     "api",
                     "product",
@@ -638,10 +720,9 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"id\": 1,\n  \"name\": \"Apipost 测试商品（已更新）\",\n  \"desc\": \"更新后的验证数据\",\n  \"stock\": 88,\n  \"amount\": 2099,\n  \"status\": 1\n}"
+              "body": "{\n  \"code\": 0,\n  \"msg\": \"ok\",\n  \"data\": {\n    \"Amount\": \"2099\",\n    \"Desc\": \"更新后的验证数据\",\n    \"Name\": \"网关测试商品（已更新）\",\n    \"Status\": \"1\",\n    \"Stock\": \"88\",\n    \"id\": \"15\"\n  }\n}"
             }
-          ],
-          "description": "已实际执行。HTTP 200\n\nCurl:\ncurl -X POST '{{baseUrl}}:8001/api/product/detail' -H 'Content-Type: application/json' -H 'Authorization: Bearer {{token}}' -d '{\"id\": 1}'\n\n实际返回：\n{\n  \"id\": 1,\n  \"name\": \"Apipost 测试商品（已更新）\",\n  \"desc\": \"更新后的验证数据\",\n  \"stock\": 88,\n  \"amount\": 2099,\n  \"status\": 1\n}"
+          ]
         },
         {
           "name": "产品删除",
@@ -652,16 +733,11 @@
                 "key": "Content-Type",
                 "value": "application/json",
                 "type": "text"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id\": 1\n}",
+              "raw": "{\n  \"id\": 15\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -669,11 +745,11 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}:8001/api/product/remove",
+              "raw": "{{baseUrl}}:8888/api/product/remove",
               "host": [
                 "{{baseUrl}}"
               ],
-              "port": "8001",
+              "port": "8888",
               "path": [
                 "api",
                 "product",
@@ -683,7 +759,7 @@
           },
           "response": [
             {
-              "name": "实际运行结果 HTTP 200",
+              "name": "实际运行结果 HTTP 200（统一响应体）",
               "originalRequest": {
                 "method": "POST",
                 "header": [
@@ -691,16 +767,11 @@
                     "key": "Content-Type",
                     "value": "application/json",
                     "type": "text"
-                  },
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
                   }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\"id\": 1}",
+                  "raw": "{\n  \"id\": 15\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -708,11 +779,11 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}:8001/api/product/remove",
+                  "raw": "{{baseUrl}}:8888/api/product/remove",
                   "host": [
                     "{{baseUrl}}"
                   ],
-                  "port": "8001",
+                  "port": "8888",
                   "path": [
                     "api",
                     "product",
@@ -729,10 +800,9 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{}"
+              "body": "{\n  \"code\": 0,\n  \"msg\": \"ok\",\n  \"data\": {}\n}"
             }
-          ],
-          "description": "已实际执行。HTTP 200\n\nCurl:\ncurl -X POST '{{baseUrl}}:8001/api/product/remove' -H 'Content-Type: application/json' -H 'Authorization: Bearer {{token}}' -d '{\"id\": 1}'\n\n实际返回：\n{}"
+          ]
         }
       ]
     },
@@ -748,16 +818,11 @@
                 "key": "Content-Type",
                 "value": "application/json",
                 "type": "text"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"uid\": 3,\n  \"pid\": 1,\n  \"amount\": 2099,\n  \"status\": 1\n}",
+              "raw": "{\n  \"Uid\": 26,\n  \"Pid\": 15,\n  \"Amount\": 2099,\n  \"Status\": 1\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -765,11 +830,11 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}:8002/api/order/create",
+              "raw": "{{baseUrl}}:8888/api/order/create",
               "host": [
                 "{{baseUrl}}"
               ],
-              "port": "8002",
+              "port": "8888",
               "path": [
                 "api",
                 "order",
@@ -779,7 +844,7 @@
           },
           "response": [
             {
-              "name": "实际运行结果 HTTP 200",
+              "name": "实际运行结果 HTTP 200（统一响应体）",
               "originalRequest": {
                 "method": "POST",
                 "header": [
@@ -787,16 +852,11 @@
                     "key": "Content-Type",
                     "value": "application/json",
                     "type": "text"
-                  },
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
                   }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\"uid\": 3, \"pid\": 1, \"amount\": 2099, \"status\": 1}",
+                  "raw": "{\n  \"Uid\": 26,\n  \"Pid\": 15,\n  \"Amount\": 2099,\n  \"Status\": 1\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -804,11 +864,11 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}:8002/api/order/create",
+                  "raw": "{{baseUrl}}:8888/api/order/create",
                   "host": [
                     "{{baseUrl}}"
                   ],
-                  "port": "8002",
+                  "port": "8888",
                   "path": [
                     "api",
                     "order",
@@ -825,10 +885,9 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"id\": 1\n}"
+              "body": "{\n  \"code\": 0,\n  \"msg\": \"ok\",\n  \"data\": {\n    \"id\": \"24\"\n  }\n}"
             }
-          ],
-          "description": "已实际执行。HTTP 200\n\nCurl:\ncurl -X POST '{{baseUrl}}:8002/api/order/create' -H 'Content-Type: application/json' -H 'Authorization: Bearer {{token}}' -d '{\"uid\": 3, \"pid\": 1, \"amount\": 2099, \"status\": 1}'\n\n实际返回：\n{\n  \"id\": 1\n}"
+          ]
         },
         {
           "name": "订单详情（创建后）",
@@ -839,16 +898,11 @@
                 "key": "Content-Type",
                 "value": "application/json",
                 "type": "text"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id\": 1\n}",
+              "raw": "{\n  \"id\": 24\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -856,11 +910,11 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}:8002/api/order/detail",
+              "raw": "{{baseUrl}}:8888/api/order/detail",
               "host": [
                 "{{baseUrl}}"
               ],
-              "port": "8002",
+              "port": "8888",
               "path": [
                 "api",
                 "order",
@@ -870,7 +924,7 @@
           },
           "response": [
             {
-              "name": "实际运行结果 HTTP 200",
+              "name": "实际运行结果 HTTP 200（统一响应体）",
               "originalRequest": {
                 "method": "POST",
                 "header": [
@@ -878,16 +932,11 @@
                     "key": "Content-Type",
                     "value": "application/json",
                     "type": "text"
-                  },
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
                   }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\"id\": 1}",
+                  "raw": "{\n  \"id\": 24\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -895,11 +944,11 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}:8002/api/order/detail",
+                  "raw": "{{baseUrl}}:8888/api/order/detail",
                   "host": [
                     "{{baseUrl}}"
                   ],
-                  "port": "8002",
+                  "port": "8888",
                   "path": [
                     "api",
                     "order",
@@ -916,10 +965,9 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"id\": 1,\n  \"uid\": 3,\n  \"pid\": 1,\n  \"amount\": 2099,\n  \"status\": 0\n}"
+              "body": "{\n  \"code\": 0,\n  \"msg\": \"ok\",\n  \"data\": {\n    \"Amount\": \"2099\",\n    \"Pid\": \"15\",\n    \"Status\": \"0\",\n    \"Uid\": \"26\",\n    \"id\": \"24\"\n  }\n}"
             }
-          ],
-          "description": "已实际执行。HTTP 200\n\nCurl:\ncurl -X POST '{{baseUrl}}:8002/api/order/detail' -H 'Content-Type: application/json' -H 'Authorization: Bearer {{token}}' -d '{\"id\": 1}'\n\n实际返回：\n{\n  \"id\": 1,\n  \"uid\": 3,\n  \"pid\": 1,\n  \"amount\": 2099,\n  \"status\": 0\n}"
+          ]
         },
         {
           "name": "订单修改",
@@ -930,16 +978,11 @@
                 "key": "Content-Type",
                 "value": "application/json",
                 "type": "text"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id\": 1,\n  \"uid\": 3,\n  \"pid\": 1,\n  \"amount\": 2199,\n  \"status\": 2\n}",
+              "raw": "{\n  \"id\": 24,\n  \"Uid\": 26,\n  \"Pid\": 15,\n  \"Amount\": 2199,\n  \"Status\": 2\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -947,11 +990,11 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}:8002/api/order/update",
+              "raw": "{{baseUrl}}:8888/api/order/update",
               "host": [
                 "{{baseUrl}}"
               ],
-              "port": "8002",
+              "port": "8888",
               "path": [
                 "api",
                 "order",
@@ -961,7 +1004,7 @@
           },
           "response": [
             {
-              "name": "实际运行结果 HTTP 200",
+              "name": "实际运行结果 HTTP 200（统一响应体）",
               "originalRequest": {
                 "method": "POST",
                 "header": [
@@ -969,16 +1012,11 @@
                     "key": "Content-Type",
                     "value": "application/json",
                     "type": "text"
-                  },
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
                   }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\"id\": 1, \"uid\": 3, \"pid\": 1, \"amount\": 2199, \"status\": 2}",
+                  "raw": "{\n  \"id\": 24,\n  \"Uid\": 26,\n  \"Pid\": 15,\n  \"Amount\": 2199,\n  \"Status\": 2\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -986,11 +1024,11 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}:8002/api/order/update",
+                  "raw": "{{baseUrl}}:8888/api/order/update",
                   "host": [
                     "{{baseUrl}}"
                   ],
-                  "port": "8002",
+                  "port": "8888",
                   "path": [
                     "api",
                     "order",
@@ -1007,10 +1045,9 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{}"
+              "body": "{\n  \"code\": 0,\n  \"msg\": \"ok\",\n  \"data\": {}\n}"
             }
-          ],
-          "description": "已实际执行。HTTP 200\n\nCurl:\ncurl -X POST '{{baseUrl}}:8002/api/order/update' -H 'Content-Type: application/json' -H 'Authorization: Bearer {{token}}' -d '{\"id\": 1, \"uid\": 3, \"pid\": 1, \"amount\": 2199, \"status\": 2}'\n\n实际返回：\n{}"
+          ]
         },
         {
           "name": "订单详情（修改后）",
@@ -1021,16 +1058,11 @@
                 "key": "Content-Type",
                 "value": "application/json",
                 "type": "text"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id\": 1\n}",
+              "raw": "{\n  \"id\": 24\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1038,11 +1070,11 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}:8002/api/order/detail",
+              "raw": "{{baseUrl}}:8888/api/order/detail",
               "host": [
                 "{{baseUrl}}"
               ],
-              "port": "8002",
+              "port": "8888",
               "path": [
                 "api",
                 "order",
@@ -1052,7 +1084,7 @@
           },
           "response": [
             {
-              "name": "实际运行结果 HTTP 200",
+              "name": "实际运行结果 HTTP 200（统一响应体）",
               "originalRequest": {
                 "method": "POST",
                 "header": [
@@ -1060,16 +1092,11 @@
                     "key": "Content-Type",
                     "value": "application/json",
                     "type": "text"
-                  },
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
                   }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\"id\": 1}",
+                  "raw": "{\n  \"id\": 24\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1077,11 +1104,11 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}:8002/api/order/detail",
+                  "raw": "{{baseUrl}}:8888/api/order/detail",
                   "host": [
                     "{{baseUrl}}"
                   ],
-                  "port": "8002",
+                  "port": "8888",
                   "path": [
                     "api",
                     "order",
@@ -1098,10 +1125,9 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"id\": 1,\n  \"uid\": 3,\n  \"pid\": 1,\n  \"amount\": 2199,\n  \"status\": 2\n}"
+              "body": "{\n  \"code\": 0,\n  \"msg\": \"ok\",\n  \"data\": {\n    \"Amount\": \"2199\",\n    \"Pid\": \"15\",\n    \"Status\": \"2\",\n    \"Uid\": \"26\",\n    \"id\": \"24\"\n  }\n}"
             }
-          ],
-          "description": "已实际执行。HTTP 200\n\nCurl:\ncurl -X POST '{{baseUrl}}:8002/api/order/detail' -H 'Content-Type: application/json' -H 'Authorization: Bearer {{token}}' -d '{\"id\": 1}'\n\n实际返回：\n{\n  \"id\": 1,\n  \"uid\": 3,\n  \"pid\": 1,\n  \"amount\": 2199,\n  \"status\": 2\n}"
+          ]
         },
         {
           "name": "订单列表",
@@ -1112,16 +1138,11 @@
                 "key": "Content-Type",
                 "value": "application/json",
                 "type": "text"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"uid\": 3\n}",
+              "raw": "{\n  \"uid\": 26\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1129,11 +1150,11 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}:8002/api/order/list",
+              "raw": "{{baseUrl}}:8888/api/order/list",
               "host": [
                 "{{baseUrl}}"
               ],
-              "port": "8002",
+              "port": "8888",
               "path": [
                 "api",
                 "order",
@@ -1143,7 +1164,7 @@
           },
           "response": [
             {
-              "name": "实际运行结果 HTTP 200",
+              "name": "实际运行结果 HTTP 200（统一响应体）",
               "originalRequest": {
                 "method": "POST",
                 "header": [
@@ -1151,16 +1172,11 @@
                     "key": "Content-Type",
                     "value": "application/json",
                     "type": "text"
-                  },
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
                   }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\"uid\": 3}",
+                  "raw": "{\n  \"uid\": 26\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1168,11 +1184,11 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}:8002/api/order/list",
+                  "raw": "{{baseUrl}}:8888/api/order/list",
                   "host": [
                     "{{baseUrl}}"
                   ],
-                  "port": "8002",
+                  "port": "8888",
                   "path": [
                     "api",
                     "order",
@@ -1189,13 +1205,12 @@
                   "value": "application/json"
                 }
               ],
-              "body": "[\n  {\n    \"id\": 1,\n    \"uid\": 3,\n    \"pid\": 1,\n    \"amount\": 2199,\n    \"status\": 2\n  }\n]"
+              "body": "{\n  \"code\": 0,\n  \"msg\": \"ok\",\n  \"data\": {\n    \"data\": [\n      {\n        \"Amount\": \"2199\",\n        \"Pid\": \"15\",\n        \"Status\": \"2\",\n        \"Uid\": \"26\",\n        \"id\": \"24\"\n      }\n    ]\n  }\n}"
             }
-          ],
-          "description": "已实际执行。HTTP 200\n\nCurl:\ncurl -X POST '{{baseUrl}}:8002/api/order/list' -H 'Content-Type: application/json' -H 'Authorization: Bearer {{token}}' -d '{\"uid\": 3}'\n\n实际返回：\n[\n  {\n    \"id\": 1,\n    \"uid\": 3,\n    \"pid\": 1,\n    \"amount\": 2199,\n    \"status\": 2\n  }\n]"
+          ]
         },
         {
-          "name": "订单删除",
+          "name": "订单聚合（多RPC并行）",
           "request": {
             "method": "POST",
             "header": [
@@ -1212,7 +1227,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id\": 1\n}",
+              "raw": "{\n  \"id\": 24\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1220,21 +1235,21 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}:8002/api/order/remove",
+              "raw": "{{baseUrl}}:8888/api/order/aggregate",
               "host": [
                 "{{baseUrl}}"
               ],
-              "port": "8002",
+              "port": "8888",
               "path": [
                 "api",
                 "order",
-                "remove"
+                "aggregate"
               ]
             }
           },
           "response": [
             {
-              "name": "实际运行结果 HTTP 200",
+              "name": "实际运行结果 HTTP 200（统一响应体）",
               "originalRequest": {
                 "method": "POST",
                 "header": [
@@ -1251,7 +1266,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\"id\": 1}",
+                  "raw": "{\n  \"id\": 24\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1259,11 +1274,91 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}:8002/api/order/remove",
+                  "raw": "{{baseUrl}}:8888/api/order/aggregate",
                   "host": [
                     "{{baseUrl}}"
                   ],
-                  "port": "8002",
+                  "port": "8888",
+                  "path": [
+                    "api",
+                    "order",
+                    "aggregate"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"code\": 0,\n  \"msg\": \"ok\",\n  \"data\": {\n    \"order\": {\n      \"amount\": 2199,\n      \"id\": 24,\n      \"pid\": 15,\n      \"status\": 2,\n      \"uid\": 26\n    },\n    \"product\": {\n      \"amount\": 2099,\n      \"desc\": \"更新后的验证数据\",\n      \"id\": 15,\n      \"name\": \"网关测试商品（已更新）\",\n      \"status\": 1,\n      \"stock\": 87\n    },\n    \"user\": {\n      \"gender\": 1,\n      \"id\": 26,\n      \"mobile\": \"18805526038\",\n      \"name\": \"apipost-统一网关\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "订单删除",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 24\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}:8888/api/order/remove",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "port": "8888",
+              "path": [
+                "api",
+                "order",
+                "remove"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "实际运行结果 HTTP 200（统一响应体）",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 24\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}:8888/api/order/remove",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "port": "8888",
                   "path": [
                     "api",
                     "order",
@@ -1280,10 +1375,9 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{}"
+              "body": "{\n  \"code\": 0,\n  \"msg\": \"ok\",\n  \"data\": {}\n}"
             }
-          ],
-          "description": "已实际执行。HTTP 200\n\nCurl:\ncurl -X POST '{{baseUrl}}:8002/api/order/remove' -H 'Content-Type: application/json' -H 'Authorization: Bearer {{token}}' -d '{\"id\": 1}'\n\n实际返回：\n{}"
+          ]
         }
       ]
     },
@@ -1299,16 +1393,11 @@
                 "key": "Content-Type",
                 "value": "application/json",
                 "type": "text"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"uid\": 3,\n  \"oid\": 1,\n  \"amount\": 2199\n}",
+              "raw": "{\n  \"Uid\": 26,\n  \"Oid\": 24,\n  \"Amount\": 2199\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1316,11 +1405,11 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}:8003/api/pay/create",
+              "raw": "{{baseUrl}}:8888/api/pay/create",
               "host": [
                 "{{baseUrl}}"
               ],
-              "port": "8003",
+              "port": "8888",
               "path": [
                 "api",
                 "pay",
@@ -1330,7 +1419,7 @@
           },
           "response": [
             {
-              "name": "实际运行结果 HTTP 200",
+              "name": "实际运行结果 HTTP 200（统一响应体）",
               "originalRequest": {
                 "method": "POST",
                 "header": [
@@ -1338,16 +1427,11 @@
                     "key": "Content-Type",
                     "value": "application/json",
                     "type": "text"
-                  },
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
                   }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\"uid\": 3, \"oid\": 1, \"amount\": 2199}",
+                  "raw": "{\n  \"Uid\": 26,\n  \"Oid\": 24,\n  \"Amount\": 2199\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1355,11 +1439,11 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}:8003/api/pay/create",
+                  "raw": "{{baseUrl}}:8888/api/pay/create",
                   "host": [
                     "{{baseUrl}}"
                   ],
-                  "port": "8003",
+                  "port": "8888",
                   "path": [
                     "api",
                     "pay",
@@ -1376,10 +1460,9 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"id\": 1\n}"
+              "body": "{\n  \"code\": 0,\n  \"msg\": \"ok\",\n  \"data\": {\n    \"id\": \"11\"\n  }\n}"
             }
-          ],
-          "description": "已实际执行。HTTP 200\n\nCurl:\ncurl -X POST '{{baseUrl}}:8003/api/pay/create' -H 'Content-Type: application/json' -H 'Authorization: Bearer {{token}}' -d '{\"uid\": 3, \"oid\": 1, \"amount\": 2199}'\n\n实际返回：\n{\n  \"id\": 1\n}"
+          ]
         },
         {
           "name": "支付详情（创建后）",
@@ -1390,16 +1473,11 @@
                 "key": "Content-Type",
                 "value": "application/json",
                 "type": "text"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id\": 1\n}",
+              "raw": "{\n  \"id\": 11\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1407,11 +1485,11 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}:8003/api/pay/detail",
+              "raw": "{{baseUrl}}:8888/api/pay/detail",
               "host": [
                 "{{baseUrl}}"
               ],
-              "port": "8003",
+              "port": "8888",
               "path": [
                 "api",
                 "pay",
@@ -1421,7 +1499,7 @@
           },
           "response": [
             {
-              "name": "实际运行结果 HTTP 200",
+              "name": "实际运行结果 HTTP 200（统一响应体）",
               "originalRequest": {
                 "method": "POST",
                 "header": [
@@ -1429,16 +1507,11 @@
                     "key": "Content-Type",
                     "value": "application/json",
                     "type": "text"
-                  },
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
                   }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\"id\": 1}",
+                  "raw": "{\n  \"id\": 11\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1446,11 +1519,11 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}:8003/api/pay/detail",
+                  "raw": "{{baseUrl}}:8888/api/pay/detail",
                   "host": [
                     "{{baseUrl}}"
                   ],
-                  "port": "8003",
+                  "port": "8888",
                   "path": [
                     "api",
                     "pay",
@@ -1467,10 +1540,9 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"id\": 1,\n  \"uid\": 3,\n  \"oid\": 1,\n  \"amount\": 2199,\n  \"source\": 0,\n  \"status\": 0\n}"
+              "body": "{\n  \"code\": 0,\n  \"msg\": \"ok\",\n  \"data\": {\n    \"Amount\": \"2199\",\n    \"Oid\": \"24\",\n    \"Source\": \"0\",\n    \"Status\": \"0\",\n    \"Uid\": \"26\",\n    \"id\": \"11\"\n  }\n}"
             }
-          ],
-          "description": "已实际执行。HTTP 200\n\nCurl:\ncurl -X POST '{{baseUrl}}:8003/api/pay/detail' -H 'Content-Type: application/json' -H 'Authorization: Bearer {{token}}' -d '{\"id\": 1}'\n\n实际返回：\n{\n  \"id\": 1,\n  \"uid\": 3,\n  \"oid\": 1,\n  \"amount\": 2199,\n  \"source\": 0,\n  \"status\": 0\n}"
+          ]
         },
         {
           "name": "支付回调",
@@ -1481,16 +1553,11 @@
                 "key": "Content-Type",
                 "value": "application/json",
                 "type": "text"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id\": 1,\n  \"uid\": 3,\n  \"oid\": 1,\n  \"amount\": 2199,\n  \"source\": 1,\n  \"status\": 1\n}",
+              "raw": "{\n  \"id\": 11,\n  \"Uid\": 26,\n  \"Oid\": 24,\n  \"Amount\": 2199,\n  \"Source\": 1,\n  \"Status\": 1\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1498,11 +1565,11 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}:8003/api/pay/callback",
+              "raw": "{{baseUrl}}:8888/api/pay/callback",
               "host": [
                 "{{baseUrl}}"
               ],
-              "port": "8003",
+              "port": "8888",
               "path": [
                 "api",
                 "pay",
@@ -1512,7 +1579,7 @@
           },
           "response": [
             {
-              "name": "实际运行结果 HTTP 200",
+              "name": "实际运行结果 HTTP 200（统一响应体）",
               "originalRequest": {
                 "method": "POST",
                 "header": [
@@ -1520,16 +1587,11 @@
                     "key": "Content-Type",
                     "value": "application/json",
                     "type": "text"
-                  },
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
                   }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\"id\": 1, \"uid\": 3, \"oid\": 1, \"amount\": 2199, \"source\": 1, \"status\": 1}",
+                  "raw": "{\n  \"id\": 11,\n  \"Uid\": 26,\n  \"Oid\": 24,\n  \"Amount\": 2199,\n  \"Source\": 1,\n  \"Status\": 1\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1537,11 +1599,11 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}:8003/api/pay/callback",
+                  "raw": "{{baseUrl}}:8888/api/pay/callback",
                   "host": [
                     "{{baseUrl}}"
                   ],
-                  "port": "8003",
+                  "port": "8888",
                   "path": [
                     "api",
                     "pay",
@@ -1558,10 +1620,9 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{}"
+              "body": "{\n  \"code\": 0,\n  \"msg\": \"ok\",\n  \"data\": {}\n}"
             }
-          ],
-          "description": "已实际执行。HTTP 200\n\nCurl:\ncurl -X POST '{{baseUrl}}:8003/api/pay/callback' -H 'Content-Type: application/json' -H 'Authorization: Bearer {{token}}' -d '{\"id\": 1, \"uid\": 3, \"oid\": 1, \"amount\": 2199, \"source\": 1, \"status\": 1}'\n\n实际返回：\n{}"
+          ]
         },
         {
           "name": "支付详情（回调后）",
@@ -1572,16 +1633,11 @@
                 "key": "Content-Type",
                 "value": "application/json",
                 "type": "text"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id\": 1\n}",
+              "raw": "{\n  \"id\": 11\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1589,11 +1645,11 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}:8003/api/pay/detail",
+              "raw": "{{baseUrl}}:8888/api/pay/detail",
               "host": [
                 "{{baseUrl}}"
               ],
-              "port": "8003",
+              "port": "8888",
               "path": [
                 "api",
                 "pay",
@@ -1603,7 +1659,7 @@
           },
           "response": [
             {
-              "name": "实际运行结果 HTTP 200",
+              "name": "实际运行结果 HTTP 200（统一响应体）",
               "originalRequest": {
                 "method": "POST",
                 "header": [
@@ -1611,16 +1667,11 @@
                     "key": "Content-Type",
                     "value": "application/json",
                     "type": "text"
-                  },
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
                   }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\"id\": 1}",
+                  "raw": "{\n  \"id\": 11\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1628,11 +1679,11 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}:8003/api/pay/detail",
+                  "raw": "{{baseUrl}}:8888/api/pay/detail",
                   "host": [
                     "{{baseUrl}}"
                   ],
-                  "port": "8003",
+                  "port": "8888",
                   "path": [
                     "api",
                     "pay",
@@ -1649,10 +1700,9 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"id\": 1,\n  \"uid\": 3,\n  \"oid\": 1,\n  \"amount\": 2199,\n  \"source\": 1,\n  \"status\": 1\n}"
+              "body": "{\n  \"code\": 0,\n  \"msg\": \"ok\",\n  \"data\": {\n    \"Amount\": \"2199\",\n    \"Oid\": \"24\",\n    \"Source\": \"1\",\n    \"Status\": \"1\",\n    \"Uid\": \"26\",\n    \"id\": \"11\"\n  }\n}"
             }
-          ],
-          "description": "已实际执行。HTTP 200\n\nCurl:\ncurl -X POST '{{baseUrl}}:8003/api/pay/detail' -H 'Content-Type: application/json' -H 'Authorization: Bearer {{token}}' -d '{\"id\": 1}'\n\n实际返回：\n{\n  \"id\": 1,\n  \"uid\": 3,\n  \"oid\": 1,\n  \"amount\": 2199,\n  \"source\": 1,\n  \"status\": 1\n}"
+          ]
         }
       ]
     }

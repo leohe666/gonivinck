@@ -28,29 +28,7 @@ scrape_configs:
       - targets: ["localhost:9090"]
 
   # 我们自己的商城项目配置
-  - job_name: 'mall-api'
-    static_configs:
-      # 目标的采集地址
-      - targets: ['golang:9080']
-        labels:
-          # 自定义标签
-          app: 'user-api'
-          env: 'test'
-
-      - targets: ['golang:9081']
-        labels:
-          app: 'product-api'
-          env: 'test'
-
-      - targets: ['golang:9082']
-        labels:
-          app: 'order-api'
-          env: 'test'
-
-      - targets: ['golang:9083']
-        labels:
-          app: 'pay-api'
-          env: 'test'
+  # 注: 旧 API 服务(8000-8003)已下线，统一走网关，其指标不再采集
 
   - job_name: 'mall-rpc'
     static_configs:

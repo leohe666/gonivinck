@@ -9,9 +9,12 @@ datasources:
     editable: false
     jsonData:
       derivedFields:
+        # TraceID -> Grafana 内部跳转：在 Explore 右侧打开 Jaeger 面板并查询该 trace
+        # （不跳外部页面）。url 模板会插值成 trace id 作为 Jaeger 的 query 值，
+        # datasourceUid 指向 jaeger 数据源；两者组合才是 Grafana 内部链接。
         - name: TraceID
           matcherRegex: '"trace":"([0-9a-f]{32})"'
-          url: '${__value.raw}'
+          url: '$${__value.raw}'
           datasourceUid: jaeger
 
   - name: Jaeger

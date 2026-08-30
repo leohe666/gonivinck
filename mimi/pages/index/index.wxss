@@ -1,0 +1,74 @@
+/* 首页样式 */
+.page {
+  padding: 32rpx;
+}
+
+.card {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 32rpx;
+  margin-bottom: 32rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.05);
+}
+
+.card-title {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 24rpx;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 14rpx 0;
+  border-bottom: 1rpx solid #f6f6f6;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.k {
+  font-size: 26rpx;
+  color: #999;
+  flex-shrink: 0;
+}
+
+.v {
+  font-size: 26rpx;
+  color: #333;
+  word-break: break-all;
+  text-align: right;
+  margin-left: 32rpx;
+}
+
+.v.token {
+  font-family: monospace;
+  font-size: 22rpx;
+  color: #576b95;
+}
+
+.empty {
+  font-size: 26rpx;
+  color: #bbb;
+}
+
+.action {
+  margin-top: 24rpx;
+}
+
+.btn-outline {
+  margin-top: 24rpx;
+  background: #fff;
+  color: #e64340;
+  border: 1rpx solid #e64340;
+  border-radius: 44rpx;
+  font-size: 30rpx;
+}
+
+.btn-outline::after {
+  border: none;
+}
