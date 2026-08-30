@@ -76,18 +76,10 @@ scrape_configs:
           app: 'pay-rpc'
           env: 'test'
 
-  # BFF 统一网关
+  # 统一网关 (8888, 一个进程一个端口: 透传 + login/userinfo/aggregate)
   - job_name: 'mall-gateway'
     static_configs:
       - targets: ['golang:9088']
         labels:
           app: 'gateway-api'
-          env: 'test'
-
-  # BFF 聚合服务 (8887, 方案B 拆分后新增)
-  - job_name: 'mall-bff'
-    static_configs:
-      - targets: ['golang:9087']
-        labels:
-          app: 'bff-api'
           env: 'test'

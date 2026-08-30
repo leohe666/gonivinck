@@ -225,28 +225,29 @@ curl -s "http://localhost:5001/api/traces/$RID" | python3 -m json.tool
 
 ### 本地开发（热加载）
 
-代码挂载在 `code/` 目录，容器内路径 `/usr/src/code`。8 个微服务各自独立 air 热加载。
+代码挂载在 `code/` 目录，容器内路径 `/usr/src/code`。8 个业务微服务 + 1 个统一网关，各自独立 air 热加载。
 
 ```bash
 # 进入 golang 容器
 docker exec -it gonivinck_new-golang-1 bash
 
-# 方式 A：一键启动（推荐，8 个 air + 进程守护）
+# 方式 A：一键启动（推荐，9 个 air + 进程守护）
 cd /usr/src/code && make run
 
 # 方式 B：分离模式
-# 终端 1: make air       # 仅启动 8 个 air 文件监听
-# 终端 2: make services  # 仅启动 8 个服务进程（由 air 编译后自动重启）
+# 终端 1: make air       # 仅启动 9 个 air 文件监听
+# 终端 2: make services  # 仅启动 9 个服务进程（由 air 编译后自动重启）
 
 # 常用 make 命令
-make build   # 仅编译 8 服务到 tmp/
+make build   # 仅编译 9 服务到 tmp/
 make stop    # 停止所有 air + 服务进程
 make clean   # 清理 tmp/ 编译产物
 make help    # 显示帮助
 ```
 
 **Makefile 关键特性**
-- 8 个服务各自独立 `.air.*.toml` → 改哪个重哪个，互不干扰
+- 9 个服务各自独立 `.air.*.toml` → 改哪个重哪个，互不干扰
+- 统一网关 `service/gateway`：一个进程一个端口 (8888)，承载 HTTP→gRPC 透传 + login/userinfo/aggregate 聚合接口
 - `start-services.sh` 串行重启：等进程退出 → 等端口释放 → 校验 ELF 合法 → debounce 去重
 - 编译产物输出到 `tmp/`，不污染源码目录
 
