@@ -9,6 +9,10 @@ module.exports = {
   //    「开发管理 → 开发设置 → 服务器域名 → request 合法域名」里配置
   baseUrl: 'http://localhost:8888',
 
+  // 商户 Id（SaaS 多租户标识，对应后端 merchant 表；每个商户独立 Casdoor 组织 + 微信凭据）
+  // 登录请求会自动附带该字段，后端按商户路由 Casdoor/微信配置（见 docs/saas-multi-tenant-login-design.md）
+  merchantId: 1,
+
   // 小程序 AppID（与 project.config.json 的 appid 保持一致）
   // 后端 Casdoor 的微信小程序 Provider (admin/provider-wechat-mp) 使用同一组
   // AppID/AppSecret，见 docs/casdoor-integration.md
@@ -22,7 +26,9 @@ module.exports = {
     token: 'mall_token',
     accessExpire: 'mall_access_expire',
     userId: 'mall_user_id',
+    casdoorId: 'mall_casdoor_id',
     casdoorName: 'mall_casdoor_name',
+    mobile: 'mall_mobile',
     userInfo: 'mall_user_info'
   }
 }

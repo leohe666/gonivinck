@@ -6,7 +6,9 @@ App({
   globalData: {
     token: null,
     userId: null,
-    casdoorName: null
+    casdoorId: null,
+    casdoorName: null,
+    mobile: null
   },
 
   onLaunch() {
@@ -15,7 +17,7 @@ App({
       wx.reLaunch({ url: '/pages/login/index' })
     })
 
-    // 静默登录：已有 token 跳过；没有则静默换取（不弹窗打扰）
+    // 已有 token 直接恢复登录态；无 token 时返回未登录，由登录页引导用户授权手机号完成首次登录。
     auth
       .silentLogin()
       .then((data) => {

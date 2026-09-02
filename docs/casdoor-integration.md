@@ -4,13 +4,13 @@
 
 - **一个 Casdoor 实例 = 一个多租户身份平台**：每个租户（客户）在 Casdoor 里是一个 `organization`。
 - 本商城当前使用租户 `mall`（organization = `mall`），应用 `mall-app`。
-- 商城自身不存第三方密码/凭据，只存一个 `casdoor_name` 映射（微信 openid 等），用户身份统一由 Casdoor 管理。
+- 商城自身不存第三方密码/凭据，只存一个 `casdoor_id` 映射（Casdoor 用户 Id，稳定唯一），用户身份统一由 Casdoor 管理。
 
 登录链路（微信小程序）：
 
 ```
-微信小程序 (wx.login → code)
-   │  POST /api/user/mp/login {code}
+微信小程序 (wx.login → code + getPhoneNumber → phoneCode)
+   │  POST /api/user/mp/login {code, phoneCode}
    ▼
 Go-Zero 后端 (user.api / gateway)
    │  ① POST {CASDOOR}/api/login/oauth/access_token
@@ -19,11 +19,16 @@ Go-Zero 后端 (user.api / gateway)
 Casdoor ──② jscode2session──▶ 微信服务器 (换 openid，自动创建/更新 Casdoor 用户)
    │  ③ 返回 Casdoor JWT (RS256，应用证书签名)
    ▼
-Go-Zero 后端 ④ 用证书公钥校验 JWT → 取 user.name（形如 wechat-{openid}）
-   │  ⑤ 落地本地 user 表（首次自动注册）→ 签发商城自身 JWT
+Go-Zero 后端 ④ 用证书公钥校验 JWT → 取稳定关联键 user.id + name（形如 wechat-{openid}）
+   │  ⑤ 用 phoneCode 调微信 getuserphonenumber 换取真实手机号（common/wechatx）
+   │  ⑥ 用用户 JWT 把手机号写回 Casdoor 用户信息（用户自更新，无 clientSecret）
+   │  ⑦ 落地本地 user 表（首次自动注册，casdoor_id 关联，mobile=真实手机号）→ 签发商城自身 JWT
    ▼
-返回 {accessToken, accessExpire, userId, casdoorName}
+返回 {accessToken, accessExpire, userId, casdoorId, casdoorName, mobile}
 ```
+
+> **手机号必填**：登录请求必须携带 `phoneCode`（微信手机号快速验证组件返回的一次性 code），
+> 后端据此换取真实手机号写入 `user.mobile`，并同步写回 Casdoor 用户信息（`phone`）。未授权手机号直接拒绝登录。
 
 ---
 
@@ -34,8 +39,8 @@ Go-Zero 后端 ④ 用证书公钥校验 JWT → 取 user.name（形如 wechat-{
 | `docker-compose.yml` | 新增 `casdoor` 服务（`casbin/casdoor:3.163.0`，宿主机端口 **8443**，数据持久化 `data/casdoor`） |
 | `casdoor/init_data.json` | Casdoor 首次启动自动导入：租户 `mall`、应用 `mall-app`、微信小程序 Provider、JWT 证书 `cert-mall`、演示用户 `mall-user` |
 | `casdoor/cert-mall.{crt,key}` | 为 Casdoor JWT 签名生成的 RSA 证书（私钥在 Casdoor 内，公钥给后端校验） |
-| `code/common/casdoorx/` | 新增公共包：`ExchangeMiniProgramCode`（code 换 token）、`ParseToken`（JWT 校验）、`MockOpenId`（本地模拟） |
-| `code/service/user/rpc/` | `user.proto` 新增 `LoginByCasdoor` RPC（按 `casdoor_name` 查询/自动创建本地用户）；`user` 表新增 `casdoor_name` 列 |
+| `code/common/casdoorx/` | 公共包：`ExchangeMiniProgramCode`（code 换 token）、`ParseToken`（JWT 校验，取 `id` 关联键）、`UpdateUserPhone`（用户 JWT 自更新手机号） |
+| `code/service/user/rpc/` | `user.proto` `LoginByCasdoor` RPC（按 `casdoor_id` 查询/自动创建本地用户）；`user` 表以 `casdoor_id` 为唯一关联键 |
 | `code/service/gateway/api/` | 网关 8888 新增 `POST /api/user/mp/login` + `Casdoor` 配置（唯一 API 入口；旧 user/product/order/pay API 源码已删除，端口全部下线） |
 | `mimi/` | 微信小程序项目（DevTools 直接导入，真实 AppID 已配置，登录流程走通） |
 | `go-zero-mall.apipost.postman_collection.json` | 合并后的统一集合：按 用户/商品/订单/支付 分组，全部走 8888，含真实响应 |
@@ -73,7 +78,9 @@ curl -X POST http://localhost:8888/api/user/mp/login \
   "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "accessExpire": 1788175243,
   "userId": 18,
-  "casdoorName": "wechat-{微信openid}"
+  "casdoorId": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+  "casdoorName": "wechat-{微信openid}",
+  "mobile": "138****8000"
 }
 ```
 
@@ -94,6 +101,7 @@ wx.login({
       method: 'POST',
       data: {
         code: res.code,            // wx.login() 的临时凭证
+        phoneCode: phoneCode,      // getPhoneNumber 授权一次性 code（必填，换取手机号）
         username: '微信昵称',       // 可选
         avatar: 'https://头像url'  // 可选
       },
@@ -106,14 +114,19 @@ wx.login({
 });
 ```
 
-## 三、本地 Mock 模式与生产切换
+## 三、全真实链路（无 Mock）
 
-`Casdoor.MockMiniProgram`（`code/service/gateway/api/etc/gateway.yaml`，旧 user.api 已下线）：
+项目已**移除一切 mock/联调分支**（`MockMiniProgram`、`MockOpenId`、假手机号派生等均已删除），
+登录链路的每一环都是真实调用：
 
-- **本地开发（默认 true）**：没有真实微信 AppID/Secret 也能跑通整个登录流程。`code` 会被确定性映射成 openid（`mock-*`），同一个 code 永远登录同一个用户，便于重复测试。
-- **真实模式（当前已启用 false）**：走真实链路——后端把 code 交给 Casdoor，Casdoor 用微信小程序 **AppID/AppSecret** 调 `jscode2session` 换 openid。
+- `wx.login()` code → Casdoor → 微信 `jscode2session`（换 openid，自动创建/更新 Casdoor 用户）
+- `getPhoneNumber` phoneCode → 微信 `getuserphonenumber`（换真实手机号）
+- 手机号写回 Casdoor：用小程序用户刚签发的 Casdoor JWT 调 `PUT /api/update-user`（`phone` 字段），
+  以用户自身身份自更新，后端无需保存任何 clientSecret
 
-当前仓库状态：**真实微信凭据已配置**（AppID `wxf76e1101f4b99b6d` 已写入 Casdoor Provider `admin/provider-wechat-mp` 与 `casdoor/init_data.json`），`MockMiniProgram: false`，网关已实测：假 code 返回 `invalid code`（微信侧错误，证明链路真实打通）。如需切回 Mock（如无网环境联调），把 `MockMiniProgram` 改回 `true` 并重启网关即可。
+当前仓库状态：**真实微信凭据已配置**（AppID `wxf76e1101f4b99b6d` 已写入 Casdoor Provider
+`admin/provider-wechat-mp` 与 `casdoor/init_data.json`）。网关已实测：假 code 返回 `invalid code`
+（微信侧错误，证明链路真实打通）。
 
 配套小程序项目见 **`mimi/`**（微信开发者工具直接导入，`project.config.json` 已内置同一 AppID）。
 
@@ -149,7 +162,7 @@ curl -b cookies.txt "http://localhost:8443/api/get-cert?id=mall/cert-mall" \
 
 | 现象 | 原因/处理 |
 |------|----------|
-| 登录报 `invalid appid` | 微信 Provider 还是占位凭据，需填真实 AppID/AppSecret（或开 Mock） |
+| 登录报 `invalid appid` | 微信 Provider 还是占位凭据，需填真实 AppID/AppSecret |
 | `casdoor endpoint not configured` | `Casdoor.Endpoint` 为空，检查 yaml |
 | 证书读取失败日志 | `Casdoor.Certificate` 路径相对 `code/` 目录（容器内 `/usr/src/code`） |
 | Casdoor 控制台登录不上 | `docker compose logs casdoor` 看是否 panic；`data/casdoor` 数据损坏时可删除后重启（会重新导入 init_data.json） |

@@ -6,8 +6,16 @@
       <text class="v">{{userId || '未登录'}}</text>
     </view>
     <view class="row">
+      <text class="k">casdoorId</text>
+      <text class="v">{{casdoorId || '未登录'}}</text>
+    </view>
+    <view class="row">
       <text class="k">casdoorName</text>
       <text class="v">{{casdoorName || '未登录'}}</text>
+    </view>
+    <view class="row" wx:if="{{mobile}}">
+      <text class="k">mobile</text>
+      <text class="v">{{mobile}}</text>
     </view>
     <view class="row">
       <text class="k">token</text>

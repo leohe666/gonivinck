@@ -16,17 +16,20 @@
 ```
 小程序                          后端网关(8888)                  Casdoor               微信
 wx.login() → code ──┐
-                    │  POST /api/user/mp/login {code}
+getPhoneNumber → phoneCode ─┤  POST /api/user/mp/login {code, phoneCode}
                     ▼
-                 后端 → 转发 code ──▶ jscode2session ──▶ 换取 openid
+                  后端 → 转发 code ──▶ jscode2session ──▶ 换取 openid
                     ◀── 签发 Casdoor JWT ── 校验 ──┘
-                    落地本地 user 表（首次自动注册）→ 签发商城 JWT
+                  后端 → phoneCode ──▶ getuserphonenumber ──▶ 换取真实手机号
+                    落地本地 user 表（首次自动注册，mobile=真实手机号）→ 签发商城 JWT
                     ▼
-                返回 {accessToken, accessExpire, userId, casdoorName}
+                返回 {accessToken, accessExpire, userId, casdoorId, casdoorName, mobile}
 ```
 
 - 启动时 `app.js` 自动**静默登录**（已有 token 则跳过）
-- 登录页提供**微信一键登录**，可选完善头像/昵称（提交给后端更新 Casdoor 用户资料）
+- 登录页**手机号必填**：登录按钮使用 `open-type="getPhoneNumber"`，用户授权后拿到一次性 `phoneCode`，
+  随登录请求一并提交，后端换取真实手机号并写入 `user.mobile`，同时写回 Casdoor 用户信息（不授权手机号无法登录）
+- 登录页可选完善头像/昵称（提交给后端更新 Casdoor 用户资料）
 - 首页演示带 token 调用受保护接口 `/api/user/userinfo`（401 自动清理登录态并跳回登录页）
 
 ## 目录结构
@@ -53,8 +56,8 @@ mimi/
 ```bash
 docker compose up -d            # 启动全部服务（含 Casdoor）
 # Casdoor 微信 Provider 已配置真实 AppID/AppSecret（admin/provider-wechat-mp）
-# 网关 Casdoor.MockMiniProgram=false（真实链路）
-# 验证：curl -X POST http://localhost:8888/api/user/mp/login -H 'Content-Type: application/json' -d '{"code":"任意假code"}'
+# 全真实链路（无 mock 分支）
+# 验证：curl -X POST http://localhost:8888/api/user/mp/login -H 'Content-Type: application/json' -d '{"code":"任意假code","phoneCode":"任意假code"}'
 #   → 返回 casdoor error: invalid_grant: ... invalid code 即链路已通（假 code 必然失败）
 ```
 
@@ -86,7 +89,7 @@ docker compose up -d            # 启动全部服务（含 Casdoor）
 
 | 接口 | 方法 | 鉴权 | 说明 |
 |------|------|------|------|
-| `/api/user/mp/login` | POST | 公开 | `{code, username?, avatar?}` → `data: {accessToken, accessExpire, userId, casdoorName}` |
+| `/api/user/mp/login` | POST | 公开 | `{code, phoneCode, username?, avatar?}` → `data: {accessToken, accessExpire, userId, casdoorId, casdoorName, mobile}`；`phoneCode` 必填，用于换取手机号并写回 Casdoor |
 | `/api/user/userinfo` | POST | Bearer token | `data: {id, name, gender, mobile}` |
 
 错误处理：401 自动清理 token 并跳回登录页；其余错误 toast 展示后端 message。

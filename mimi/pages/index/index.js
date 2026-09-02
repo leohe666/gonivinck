@@ -6,7 +6,9 @@ const config = require('../../config/index')
 Page({
   data: {
     userId: '',
+    casdoorId: '',
     casdoorName: '',
+    mobile: '',
     tokenPreview: '',
     userInfo: null,
     loading: false
@@ -17,7 +19,9 @@ Page({
     const token = wx.getStorageSync(keys.token)
     this.setData({
       userId: wx.getStorageSync(keys.userId) || '',
+      casdoorId: wx.getStorageSync(keys.casdoorId) || '',
       casdoorName: wx.getStorageSync(keys.casdoorName) || '',
+      mobile: wx.getStorageSync(keys.mobile) || '',
       tokenPreview: token ? token.slice(0, 24) + '...' : ''
     })
   },

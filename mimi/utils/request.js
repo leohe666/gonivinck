@@ -89,7 +89,9 @@ function clearAuth() {
   wx.removeStorageSync(keys.token)
   wx.removeStorageSync(keys.accessExpire)
   wx.removeStorageSync(keys.userId)
+  wx.removeStorageSync(keys.casdoorId)
   wx.removeStorageSync(keys.casdoorName)
+  wx.removeStorageSync(keys.mobile)
   wx.removeStorageSync(keys.userInfo)
 }
 

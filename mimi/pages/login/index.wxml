@@ -26,24 +26,28 @@
     </view>
   </view>
 
+  <!-- 登录按钮：open-type="getPhoneNumber" 手机号必填授权，授权成功后自动登录 -->
   <button
     class="login-btn {{loading ? 'disabled' : ''}}"
+    open-type="getPhoneNumber"
+    bindgetphonenumber="onGetPhoneNumber"
     loading="{{loading}}"
     disabled="{{loading}}"
-    bindtap="onLogin"
   >
-    {{loading ? '正在登录...' : '微信一键登录'}}
+    {{loading ? '正在登录...' : '微信授权手机号并登录'}}
   </button>
 
   <view class="tip">
-    登录即表示同意使用 Casdoor 统一身份认证<br />首次登录将自动注册商城账号
+    点击登录即授权微信手机号（必填）<br />登录即表示同意使用 Casdoor 统一身份认证<br />首次登录将自动注册商城账号
   </view>
 
   <!-- 登录结果 -->
   <view class="result" wx:if="{{result}}">
     <text class="result-title">✅ 登录成功</text>
     <view class="result-item"><text class="k">userId</text><text class="v">{{result.userId}}</text></view>
+    <view class="result-item"><text class="k">casdoorId</text><text class="v">{{result.casdoorId}}</text></view>
     <view class="result-item"><text class="k">casdoorName</text><text class="v">{{result.casdoorName}}</text></view>
+    <view class="result-item" wx:if="{{result.mobile}}"><text class="k">mobile</text><text class="v">{{result.mobile}}</text></view>
     <view class="result-item"><text class="k">accessToken</text><text class="v token">{{tokenPreview}}</text></view>
     <text class="result-hint">1.5 秒后自动进入首页</text>
   </view>

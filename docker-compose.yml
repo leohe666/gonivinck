@@ -14,9 +14,16 @@ services:
         - TZ=${TZ}
         # 限制 go 编译并行度,避免 9 个服务同时构建时 OOM (Docker VM 内存有限)
         - GOFLAGS=-p=1
+        # 微信小程序服务端凭据（手机号换取），来源 .env（已被 gitignore，不提交）
+        - WECHAT_APP_ID=${WECHAT_APP_ID}
+        - WECHAT_APP_SECRET=${WECHAT_APP_SECRET}
+        # 平台主密钥文件（解密商户微信 AppSecret 用）；文件在 data/master.key（gitignore）
+        - MERCHANT_MASTER_KEY_FILE=/data/master.key
       volumes:
         - ${CODE_PATH_HOST}:/usr/src/code
         - ${DATA_PATH_HOST}/golang:/var/log/golang
+        # 主密钥文件只读挂载（SaaS 多商户凭据解密用）
+        - ${DATA_PATH_HOST}/master.key:/data/master.key:ro
         # 持久化 go 模块缓存与构建缓存,容器重建后无需全量冷编译
         - ${DATA_PATH_HOST}/golang-mod:/go/pkg/mod
         - ${DATA_PATH_HOST}/golang-build:/root/.cache/go-build
