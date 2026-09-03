@@ -97,6 +97,6 @@ docker compose up -d            # 启动全部服务（含 Casdoor）
 ## 常见问题
 
 - **登录失败 `invalid code`**：code 是一次性的（5 分钟有效），wx.login 每次登录都要重新调用；模拟器/真机 code 均有效
-- **请求被拦截（域名不合法）**：确认已勾选「不校验合法域名」，且 baseUrl 为 `http://localhost:8888`
-- **`request:fail` 网络异常**：确认后端已 `docker compose up -d` 且网关健康（`curl http://localhost:8888/api/user/mp/login`）
+- **请求被拦截（域名不合法）**：默认 baseUrl 为 `https://wechat.leohe.net.cn`（生产域名）；本地开发改回 `http://localhost:8888` 并勾选「不校验合法域名」。用真机/正式环境前，确认该 https 域名已加入小程序后台「服务器域名 → request 合法域名」
+- **`request:fail` 网络异常**：确认后端已 `docker compose up -d` 且网关健康（`curl http://localhost:8888/api/user/mp/login`）；走 https 域名时确认反向代理已把请求转发到网关 8888 端口
 - **头像/昵称为临时路径**：`chooseAvatar` 返回本地临时文件路径，生产需先上传到对象存储再传 URL 给后端

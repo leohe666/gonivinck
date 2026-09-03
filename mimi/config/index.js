@@ -5,9 +5,10 @@ module.exports = {
   //  本地开发: http://localhost:8888
   //    - 微信开发者工具 → 详情 → 本地设置 → 勾选“不校验合法域名、web-view（业务域名）、
   //      TLS 版本以及 HTTPS 证书”，否则无法请求 http 域名
-  //  生产环境: 必须是 https 域名，且在小程序后台
-  //    「开发管理 → 开发设置 → 服务器域名 → request 合法域名」里配置
-  baseUrl: 'http://localhost:8888',
+  //  生产/真机: https://wechat.leohe.net.cn（网关已用 HTTPS 域名反代）
+  //    - 需在小程序后台「开发管理 → 开发设置 → 服务器域名 → request 合法域名」配置
+  // 本地调试时把 baseUrl 改回 http://localhost:8888 即可
+  baseUrl: 'https://wechat.leohe.net.cn',
 
   // 商户 Id（SaaS 多租户标识，对应后端 merchant 表；每个商户独立 Casdoor 组织 + 微信凭据）
   // 登录请求会自动附带该字段，后端按商户路由 Casdoor/微信配置（见 docs/saas-multi-tenant-login-design.md）
