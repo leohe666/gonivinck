@@ -148,7 +148,13 @@ ALTER TABLE `user`
                             返回 {accessToken, userId, casdoorId, casdoorName, mobile}
 ```
 
-> **手机号写回 Casdoor 的授权方式**：Casdoor 管理接口 `PUT /api/update-user?id={owner}/{name}` 接受 `Authorization: Bearer <JWT>`，且允许用户更新**自己**的记录（`isAdminOrSelf`，Casdoor 个人资料页同款接口）。因此直接用 ③ 拿到的小程序用户 JWT 即可，商城后端**不需要**保存任何商户的 Casdoor client_secret 或管理账号。若目标 Casdoor 版本禁用了 self-update，再退化为「商户 application 开 `client_credentials`，后端持其 client_secret（加密入库）换管理 token」方案（注意该 token 权限更大，需控制）。
+> **手机号写回 Casdoor 的授权方式**：Casdoor 管理接口 `PUT /api/update-user?id={owner}/{name}` 接受 `Authorization: Bearer <JWT>`，且允许用户更新**自己**的记录（`isAdminOrSelf`，Casdoor 个人资料页同款接口）。因此直接用 ③ 拿到的小程序用户 JWT 即可，商城后端**不需要**保存任何商户的 Casdoor client_secret 或管理账号。
+>
+> **Casdoor 3.163.0 实测踩坑（2026-09-03 已解决）**：写回有两个隐藏校验，缺一不可：
+> 1. **body 必须携带稳定 `Id`（UUID）**：`ID` 字段在组织 accountItems 里 modifyRule=Immutable，SDK `UpdateUserForColumns` 会把整个 user 序列化进 body——若 body 中 `Id` 缺失或与目标不一致，服务端对比失败报 `The ID is immutable.`。
+> 2. **组织 accountItems 中 `Country code` 的 modifyRule 需为 `Self`**（默认是 `Admin`）：微信自动创建的用户 `countryCode` 为空，写 `phone` 时服务端归一化会连带写 `countryCode`，而 `Country code=Admin` 会拒绝普通用户 token（报 `Only admin can modify the Country code.` / `Phone number is invalid`）。已在 Casdoor 控制台将 mall 组织该字段改为 `Self`。
+>
+> 若目标 Casdoor 版本仍禁用 self-update（无法改组织配置时），再退化为「商户 application 开 `client_credentials`，后端持其 client_secret（加密入库）换管理 token」方案（注意该 token 权限更大，需控制）。
 
 ## 六、微信凭据安全
 
