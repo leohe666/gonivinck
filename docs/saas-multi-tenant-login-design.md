@@ -62,7 +62,7 @@ SaaS 化后的三个必须解决：
 
 - **链路 A（openid）**：凭据存 **Casdoor**（`organization` + `application` + `Provider`），商城后端只存/传 `client_id`。
 - **链路 B（手机号）**：凭据存 **商城 `merchant` 表**（AppSecret AES-GCM 加密），网关运行时解密调用。
-- **手机号写回 Casdoor**：换取到真实手机号后，商城后端用该用户刚签发的 Casdoor JWT 调 `PUT /api/update-user`（或 SDK `UpdateUser`）把 `phone` 写回 Casdoor 用户记录（自更新，无需额外管理凭据）；失败降级为仅写本地 `user` 表并记日志，可后续回补（见第五节）。
+- **手机号写回 Casdoor**：换取到真实手机号后，商城后端用商户的 **client_credentials**（casdoor_client_secret 加密存 `merchant` 表）换取 admin 上下文 token 调 `PUT /api/update-user` 把 `phone`+`countryCode` 写回 Casdoor 用户记录（用户自更新 JWT 受 ModifyRule 守卫限制，见第五节）；失败降级为仅写本地 `user` 表并记日志，可后续回补。
 
 > 为什么手机号凭据不能也放 Casdoor：Casdoor 3.163.0 的微信 IDP 未实现 `getuserphonenumber`，且把 access_token 开放给第三方缺乏安全边界。等 Casdoor 官方支持后，可收敛为单点存储。
 
@@ -137,8 +137,8 @@ ALTER TABLE `user`
                                    ▼
                               ④ 解密 A 的 wx_secret → 调微信 getuserphonenumber(phoneCode) → 手机号
                                    ▼
-                              ④½ 用 ③ 的 Casdoor JWT 调 update-user 把 phone 写回 Casdoor 用户
-                                   │  （自更新；失败则降级仅写本地，记日志待回补）
+                              ④½ 用 ③ 商户 client_credentials（admin token）调 update-user 把 phone 写回 Casdoor
+                                   │  （失败则降级仅写本地，记日志待回补）
                                    ▼
                               ⑤ userRpc.LoginByCasdoor({MerchantId:A, CasdoorId, CasdoorName, Mobile})
                                    │  user 表按 (merchant_id, casdoor_id) 查/建
@@ -148,13 +148,16 @@ ALTER TABLE `user`
                             返回 {accessToken, userId, casdoorId, casdoorName, mobile}
 ```
 
-> **手机号写回 Casdoor 的授权方式**：Casdoor 管理接口 `PUT /api/update-user?id={owner}/{name}` 接受 `Authorization: Bearer <JWT>`，且允许用户更新**自己**的记录（`isAdminOrSelf`，Casdoor 个人资料页同款接口）。因此直接用 ③ 拿到的小程序用户 JWT 即可，商城后端**不需要**保存任何商户的 Casdoor client_secret 或管理账号。
+> **手机号写回 Casdoor 的授权方式（最终实现）**：商城后端使用商户在自己 Casdoor 应用上的 **client_credentials**（`clientId`+`clientSecret`）换取 **admin 上下文 token**，再调 `update-user` 写回 `phone` + `countryCode`。
 >
-> **Casdoor 3.163.0 实测踩坑（2026-09-03 已解决）**：写回有两个隐藏校验，缺一不可：
-> 1. **body 必须携带稳定 `Id`（UUID）**：`ID` 字段在组织 accountItems 里 modifyRule=Immutable，SDK `UpdateUserForColumns` 会把整个 user 序列化进 body——若 body 中 `Id` 缺失或与目标不一致，服务端对比失败报 `The ID is immutable.`。
-> 2. **组织 accountItems 中 `Country code` 的 modifyRule 需为 `Self`**（默认是 `Admin`）：微信自动创建的用户 `countryCode` 为空，写 `phone` 时服务端归一化会连带写 `countryCode`，而 `Country code=Admin` 会拒绝普通用户 token（报 `Only admin can modify the Country code.` / `Phone number is invalid`）。已在 Casdoor 控制台将 mall 组织该字段改为 `Self`。
+> **为什么不直接用用户自更新 JWT（Casdoor 3.163.0 实测）**：普通用户 token 更新用户时受组织 accountItems 的 ModifyRule 守卫，逐字段校验，微信自动创建的用户（`countryCode` 为空）写 `phone` 会连带归一化写 `countryCode`，触发一连串拒绝：
+> 1. `ID` 字段 modifyRule=**Immutable**，SDK `UpdateUserForColumns` 全量序列化 body，若 `Id` 缺失或不一致报 `The ID is immutable.`
+> 2. `Country code` 默认 modifyRule=**Admin**（需在控制台改成 Self 才放行），否则报 `Only admin can modify the Country code.` / `Phone number is invalid`
+> 3. SDK 序列化时未填字段为零值，merge 回 oldUser 会覆盖真实值，触发 `User type` 等 Admin 守卫，报 `Only admin can modify the User type.`
 >
-> 若目标 Casdoor 版本仍禁用 self-update（无法改组织配置时），再退化为「商户 application 开 `client_credentials`，后端持其 client_secret（加密入库）换管理 token」方案（注意该 token 权限更大，需控制）。
+> client_credentials 的 admin token **一次性绕过全部 ModifyRule**，是 Casdoor 官方后端管理 API 的标准模式。
+>
+> **安全设计**：`casdoor_client_secret_enc` 与微信 AppSecret 同样用平台主密钥 AES-GCM 加密存入 `merchant` 表（主密钥只在 user rpc）；user rpc `GetMerchant` 解密后经内网 gRPC 返回网关；网关不接触主密钥、不落配置文件；admin token 进程内缓存、提前 5 分钟过期。权限范围限于该商户自己的组织，不跨商户、不涉及 built-in 全局管理员（比用户自更新权限大，需按商户隔离保管凭据）。
 
 ## 六、微信凭据安全
 
